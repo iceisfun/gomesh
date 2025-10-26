@@ -1,10 +1,38 @@
 # GoMesh Examples
 
-This directory contains executable examples demonstrating the gomesh library's functionality including perimeters, holes, and rasterization with alpha blending.
+This directory contains executable examples demonstrating the gomesh library's functionality including polygon validation, perimeters, holes, and rasterization with alpha blending.
 
 Each example can be run individually using `go run cmd/<example-name>/main.go`.
 
-## Examples
+## Polygon Validation
+
+### polygon_validation
+**Status: ✓ Demonstrates all validation features**
+
+Comprehensive demonstration of polygon validation capabilities.
+
+```bash
+go run cmd/polygon_validation/main.go
+```
+
+**Tests:**
+- ✓ Self-intersection detection
+- ✓ Size constraint validation (min area, width, height)
+- ✓ Polygon containment testing
+- ✓ Polygon intersection testing
+- ✓ Detailed validation results
+- ✓ Winding direction (CCW/CW) validation
+
+**Key Functions Demonstrated:**
+- `predicates.PolygonSelfIntersects()` - Detect self-intersecting polygons
+- `predicates.PolygonContainsPolygon()` - Test if one polygon contains another
+- `predicates.PolygonsIntersect()` - Test if two polygons overlap
+- `validation.ValidatePolygon()` - Validate with configurable constraints
+- `validation.ValidatePolygonDetailed()` - Get detailed validation results
+
+---
+
+## Mesh Validation Examples
 
 ### 1. add_perimeter
 **Status: ✓ Should Work**

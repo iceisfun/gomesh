@@ -8,6 +8,7 @@ A typed, validated, and testable infrastructure for 2D geometry using float64 co
 ## Features
 
 - **Validated Topology**: Automatic validation of mesh integrity
+- **Polygon Validation**: Self-intersection detection, containment testing, size constraints
 - **Perimeters & Holes**: Full support for polygons with interior holes
 - **Alpha Blending**: Professional-quality rasterization with proper alpha compositing
 - **Spatial Indexing**: Efficient vertex merging and spatial queries
@@ -22,6 +23,42 @@ go get github.com/iceisfun/gomesh
 ```
 
 ## Quick Start
+
+### Validating a Polygon
+
+```go
+package main
+
+import (
+    "github.com/iceisfun/gomesh/predicates"
+    "github.com/iceisfun/gomesh/types"
+    "github.com/iceisfun/gomesh/validation"
+)
+
+func main() {
+    polygon := []types.Point{
+        {X: 0, Y: 0},
+        {X: 10, Y: 0},
+        {X: 10, Y: 10},
+        {X: 0, Y: 10},
+    }
+
+    // Test for self-intersection
+    if predicates.PolygonSelfIntersects(polygon, 1e-9) {
+        panic("polygon self-intersects")
+    }
+
+    // Validate with constraints
+    err := validation.ValidatePolygon(polygon,
+        validation.WithPolygonMinArea(50),
+        validation.WithPolygonMinWidth(5),
+        validation.WithRequireCCW(true),
+    )
+    if err != nil {
+        panic(err)
+    }
+}
+```
 
 ### Creating a Mesh with Perimeters and Holes
 
@@ -60,6 +97,35 @@ func main() {
 
     // Print mesh state
     m.Print(os.Stdout)
+}
+```
+
+### Testing Polygon Containment and Intersection
+
+```go
+package main
+
+import (
+    "github.com/iceisfun/gomesh/predicates"
+    "github.com/iceisfun/gomesh/types"
+)
+
+func main() {
+    outer := []types.Point{{0,0}, {20,0}, {20,20}, {0,20}}
+    inner := []types.Point{{5,5}, {15,5}, {15,15}, {5,15}}
+
+    // Test if outer contains inner
+    if predicates.PolygonContainsPolygon(outer, inner, 1e-9) {
+        println("Outer polygon contains inner polygon")
+    }
+
+    // Test if polygons intersect
+    poly1 := []types.Point{{0,0}, {10,0}, {10,10}, {0,10}}
+    poly2 := []types.Point{{5,5}, {15,5}, {15,15}, {5,15}}
+
+    if predicates.PolygonsIntersect(poly1, poly2, 1e-9) {
+        println("Polygons intersect")
+    }
 }
 ```
 
@@ -102,10 +168,10 @@ func main() {
 
 - **types/** - Geometric primitives (Point, Edge, Triangle, PolygonLoop, AABB)
 - **mesh/** - Mesh data structure with validated topology
-- **predicates/** - Geometric predicates (orientation, containment, intersection)
+- **predicates/** - Geometric predicates (orientation, containment, intersection, self-intersection)
+- **validation/** - Polygon validation with configurable constraints (size, winding, etc.)
 - **rasterize/** - 2D rendering with alpha blending and color palettes
 - **spatial/** - Spatial indexing for efficient queries
-- **validation/** - Topology validation (self-intersection, edge crossing, etc.)
 
 ### Validation Rules
 
@@ -129,6 +195,10 @@ The mesh enforces the following rules:
 ## Examples
 
 The `cmd/` directory contains comprehensive examples:
+
+### Polygon Validation Example
+
+- `polygon_validation` - Self-intersection, containment, intersection testing
 
 ### Validation Examples
 
@@ -154,6 +224,7 @@ go run cmd/rasterize_triangles_alpha/main.go
 
 ## Documentation
 
+- [Validation Package](validation/README.md) - Polygon validation and testing
 - [Rasterize Package](rasterize/README.md) - Detailed rasterization API
 - [Design Document](DESIGN.md) - Architecture and design decisions
 - [Examples README](cmd/README.md) - All example documentation
