@@ -106,6 +106,11 @@ func (m *Mesh) AddHole(points []types.Point) (types.PolygonLoop, error) {
 		return nil, err
 	}
 
+	// Validate hole is not inside another hole
+	if err := m.validateHoleNotInsideHole(loop); err != nil {
+		return nil, err
+	}
+
 	// Track this as a hole
 	if m.holes == nil {
 		m.holes = []types.PolygonLoop{}
@@ -261,6 +266,23 @@ func (m *Mesh) validateHoleNotContainingHoles(newHole types.PolygonLoop) error {
 			p := m.vertices[vid]
 			if predicates.PointInPolygonRayCast(p, newHolePoints, m.cfg.epsilon) {
 				return fmt.Errorf("gomesh: hole cannot contain another hole")
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateHoleNotInsideHole checks that the new hole is not inside an existing hole
+func (m *Mesh) validateHoleNotInsideHole(newHole types.PolygonLoop) error {
+	for _, existingHole := range m.holes {
+		existingHolePoints := m.getPolygonPoints(existingHole)
+
+		// Check if any vertex of new hole is inside existing hole
+		for _, vid := range newHole {
+			p := m.vertices[vid]
+			if predicates.PointInPolygonRayCast(p, existingHolePoints, m.cfg.epsilon) {
+				return fmt.Errorf("gomesh: hole cannot be inside another hole")
 			}
 		}
 	}
