@@ -68,6 +68,10 @@ func Rasterize(m *mesh.Mesh, opts ...Option) (*image.RGBA, error) {
 		renderTriangleLabels(img, m, transform)
 	}
 
+	// Layer 6: Debug elements (lines and locations on top)
+	renderDebugElements(img, cfg)
+	renderDebugLocations(img, cfg)
+
 	return img, nil
 }
 
@@ -347,4 +351,50 @@ func clampInt(v, min, max int) int {
 		return max
 	}
 	return v
+}
+
+// renderDebugElements draws debug lines with labels.
+func renderDebugElements(img *image.RGBA, cfg Config) {
+	if len(cfg.DebugElements) == 0 {
+		return
+	}
+
+	// Use a bright magenta color for debug elements
+	debugColor := color.RGBA{R: 255, G: 0, B: 255, A: 255}
+
+	for _, elem := range cfg.DebugElements {
+		// Draw the line
+		DrawLineThickAlpha(img, elem.SourceX, elem.SourceY, elem.TargetX, elem.TargetY, debugColor, 2)
+
+		// Draw circles at endpoints
+		DrawCircleAlpha(img, elem.SourceX, elem.SourceY, 3, debugColor)
+		DrawCircleAlpha(img, elem.TargetX, elem.TargetY, 3, debugColor)
+
+		// Note: Label rendering would go here when text rendering is implemented
+		// For now, the distinctive magenta color and circles serve as visual markers
+		_ = elem.Name // Label will be used when text rendering is available
+	}
+}
+
+// renderDebugLocations draws debug location markers with labels.
+func renderDebugLocations(img *image.RGBA, cfg Config) {
+	if len(cfg.DebugLocations) == 0 {
+		return
+	}
+
+	// Use a bright cyan color for debug locations
+	debugColor := color.RGBA{R: 0, G: 255, B: 255, A: 255}
+
+	for _, loc := range cfg.DebugLocations {
+		// Draw concentric circles to make the location stand out
+		DrawCircleAlpha(img, loc.X, loc.Y, 5, debugColor)
+		DrawCircleAlpha(img, loc.X, loc.Y, 7, debugColor)
+		DrawCircleAlpha(img, loc.X, loc.Y, 9, debugColor)
+
+		// Draw a center point
+		DrawPointAlpha(img, loc.X, loc.Y, debugColor)
+
+		// Note: Label rendering would go here when text rendering is implemented
+		_ = loc.Name // Label will be used when text rendering is available
+	}
 }

@@ -184,6 +184,40 @@ func DrawLineThickAlpha(img *image.RGBA, x0, y0, x1, y1 int, col color.Color, th
 	}
 }
 
+// DrawCircleAlpha draws a circle outline with alpha blending.
+//
+// Uses the midpoint circle algorithm (Bresenham's circle algorithm).
+func DrawCircleAlpha(img *image.RGBA, centerX, centerY, radius int, col color.Color) {
+	if radius <= 0 {
+		return
+	}
+
+	x := radius
+	y := 0
+	err := 0
+
+	for x >= y {
+		// Draw 8 octants
+		SetPixelAlpha(img, centerX+x, centerY+y, col)
+		SetPixelAlpha(img, centerX+y, centerY+x, col)
+		SetPixelAlpha(img, centerX-y, centerY+x, col)
+		SetPixelAlpha(img, centerX-x, centerY+y, col)
+		SetPixelAlpha(img, centerX-x, centerY-y, col)
+		SetPixelAlpha(img, centerX-y, centerY-x, col)
+		SetPixelAlpha(img, centerX+y, centerY-x, col)
+		SetPixelAlpha(img, centerX+x, centerY-y, col)
+
+		if err <= 0 {
+			y++
+			err += 2*y + 1
+		}
+		if err > 0 {
+			x--
+			err -= 2*x + 1
+		}
+	}
+}
+
 func abs(x int) int {
 	if x < 0 {
 		return -x

@@ -2,17 +2,36 @@ package rasterize
 
 import "image/color"
 
+// DebugElement represents a debug line with a label.
+type DebugElement struct {
+	Name    string
+	SourceX int
+	SourceY int
+	TargetX int
+	TargetY int
+}
+
+// DebugLocation represents a debug point location with a label.
+type DebugLocation struct {
+	Name string
+	X    int
+	Y    int
+}
+
 // Config holds options for rasterizing a mesh to an image.
 type Config struct {
 	Width  int
 	Height int
 
-	Background      color.Color
-	VertexColor     color.Color
-	EdgeColor       color.Color
-	TriangleColor   color.Color
-	PerimeterColor  color.Color
-	HoleColor       color.Color
+	Background     color.Color
+	VertexColor    color.Color
+	EdgeColor      color.Color
+	TriangleColor  color.Color
+	PerimeterColor color.Color
+	HoleColor      color.Color
+
+	DebugElements  []DebugElement
+	DebugLocations []DebugLocation
 
 	FillTriangles  bool
 	DrawVertices   bool
