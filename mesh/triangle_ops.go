@@ -3,8 +3,8 @@ package mesh
 import (
 	"errors"
 
-	"gomesh/types"
-	"gomesh/validation"
+	"github.com/iceisfun/gomesh/types"
+	"github.com/iceisfun/gomesh/validation"
 )
 
 // AddTriangle adds a triangle to the mesh with validation.

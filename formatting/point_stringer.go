@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // PointString returns a concise string representation of a point.

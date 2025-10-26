@@ -3,8 +3,8 @@ package mesh
 import (
 	"fmt"
 
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // AddPerimeter adds a perimeter polygon to the mesh.

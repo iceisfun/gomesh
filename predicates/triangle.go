@@ -3,7 +3,7 @@ package predicates
 import (
 	"math"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // Area2 computes twice the signed area of a triangle.

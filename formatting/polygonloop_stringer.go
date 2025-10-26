@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // PolygonLoopString renders a polygon loop vertex list.

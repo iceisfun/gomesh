@@ -1,9 +1,9 @@
 package intersections
 
 import (
-	"gomesh/mesh"
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // SegmentIntersection computes the intersection of two segments by VertexID.

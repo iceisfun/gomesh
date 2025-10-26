@@ -3,7 +3,7 @@ package spatial
 import (
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestHashGridAddAndQuery(t *testing.T) {

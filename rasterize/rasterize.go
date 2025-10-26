@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"math"
 
-	"gomesh/mesh"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // Rasterize renders a mesh to an RGBA image.

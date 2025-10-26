@@ -1,8 +1,8 @@
 package intersections
 
 import (
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // PolygonIntersectsAABB tests if a polygon intersects an AABB.

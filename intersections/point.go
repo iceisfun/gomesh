@@ -1,9 +1,9 @@
 package intersections
 
 import (
-	"gomesh/mesh"
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // PointInMesh tests if a point is inside any triangle in the mesh.

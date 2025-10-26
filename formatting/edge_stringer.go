@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // EdgeString renders an edge in canonical form.

@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestDist2(t *testing.T) {

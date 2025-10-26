@@ -1,6 +1,6 @@
 package mesh
 
-import "gomesh/types"
+import "github.com/iceisfun/gomesh/types"
 
 type config struct {
 	epsilon float64

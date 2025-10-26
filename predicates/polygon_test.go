@@ -3,7 +3,7 @@ package predicates
 import (
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestPointInPolygonRayCast(t *testing.T) {

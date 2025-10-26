@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestArea2Orientation(t *testing.T) {

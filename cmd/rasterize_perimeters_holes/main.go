@@ -5,9 +5,9 @@ import (
 	"image/png"
 	"os"
 
-	"gomesh/mesh"
-	"gomesh/rasterize"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/rasterize"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func main() {

@@ -1,9 +1,9 @@
 package mesh
 
 import (
-	"gomesh/predicates"
-	"gomesh/spatial"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/spatial"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // AddVertex adds a vertex to the mesh or returns an existing nearby vertex.

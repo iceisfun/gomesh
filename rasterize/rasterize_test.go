@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"testing"
 
-	"gomesh/mesh"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestRasterizeBasic(t *testing.T) {

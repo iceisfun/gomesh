@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gomesh/mesh"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func main() {

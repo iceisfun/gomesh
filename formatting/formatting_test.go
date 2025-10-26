@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestFormattingHelpers(t *testing.T) {

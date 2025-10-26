@@ -1,8 +1,8 @@
 package validation
 
 import (
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // ValidateEdgeIntersections checks if triangle edges intersect existing edges.

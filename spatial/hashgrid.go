@@ -3,7 +3,7 @@ package spatial
 import (
 	"math"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // HashGrid implements Index using a uniform spatial hash grid.

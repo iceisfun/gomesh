@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // TriangleString renders a triangle's vertex IDs.

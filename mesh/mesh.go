@@ -1,8 +1,8 @@
 package mesh
 
 import (
-	"gomesh/spatial"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/spatial"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // Mesh represents a 2D triangle mesh with validated topology.

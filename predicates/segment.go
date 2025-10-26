@@ -3,7 +3,7 @@ package predicates
 import (
 	"math"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // Dist2 returns the squared Euclidean distance between two points.

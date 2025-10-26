@@ -3,7 +3,7 @@ package predicates
 import (
 	"math"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // PointInAABB tests if a point is inside or on an AABB.

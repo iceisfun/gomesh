@@ -3,8 +3,8 @@ package intersections
 import (
 	"testing"
 
-	"gomesh/mesh"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/mesh"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestMeshIntersectsAABB(t *testing.T) {

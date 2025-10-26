@@ -3,7 +3,7 @@ package mesh
 import (
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestAddVertexWithoutMerging(t *testing.T) {

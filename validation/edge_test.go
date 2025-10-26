@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestValidateEdgeIntersections(t *testing.T) {

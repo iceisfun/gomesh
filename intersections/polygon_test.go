@@ -3,7 +3,7 @@ package intersections
 import (
 	"testing"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 func TestPolygonIntersectsAABB(t *testing.T) {

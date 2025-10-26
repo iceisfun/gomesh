@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // AABBString returns a concise string for an AABB.

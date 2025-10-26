@@ -1,0 +1,237 @@
+===== Example: Overlapping Perimeters (Should Fail) =====
+
+This example demonstrates that adding overlapping perimeters is detected and rejected.
+
+SUCCESS: Added first perimeter with 4 vertices
+
+Attempting to add overlapping perimeter...
+EXPECTED ERROR: gomesh: perimeter overlaps with existing perimeter
+
+SUCCESS: Overlapping perimeter was correctly rejected!
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   8
+  Triangles:  0
+  Perimeters: 1
+  Holes:      0
+
+Vertices:
+  [0] (0, 0)
+  [1] (10, 0)
+  [2] (10, 10)
+  [3] (0, 10)
+  [4] (5, 5)
+  [5] (15, 5)
+  [6] (15, 15)
+  [7] (5, 15)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+===== Example: Hole Outside Perimeter (Should Fail) =====
+
+This example demonstrates that adding a hole outside a perimeter is rejected.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Attempting to add hole outside perimeter...
+EXPECTED ERROR: gomesh: hole must be inside a perimeter
+
+SUCCESS: Hole outside perimeter was correctly rejected!
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   8
+  Triangles:  0
+  Perimeters: 1
+  Holes:      0
+
+Vertices:
+  [0] (0, 0)
+  [1] (10, 0)
+  [2] (10, 10)
+  [3] (0, 10)
+  [4] (15, 15)
+  [5] (20, 15)
+  [6] (20, 20)
+  [7] (15, 20)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+===== Example: Hole Inside Hole (Should Fail) =====
+
+This example demonstrates that nested holes (hole inside hole) are rejected.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Adding first (outer) hole...
+SUCCESS: Added first hole with 4 vertices
+
+Attempting to add second hole inside first hole...
+EXPECTED ERROR: gomesh: hole cannot be inside another hole
+
+SUCCESS: Nested hole was correctly rejected!
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   12
+  Triangles:  0
+  Perimeters: 1
+  Holes:      1
+
+Vertices:
+  [0] (0, 0)
+  [1] (20, 0)
+  [2] (20, 20)
+  [3] (0, 20)
+  [4] (2, 2)
+  [5] (18, 2)
+  [6] (18, 18)
+  [7] (2, 18)
+  [8] (6, 6)
+  [9] (14, 6)
+  [10] (14, 14)
+  [11] (6, 14)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+Holes:
+  [0] PolygonLoop{4, 5, 6, 7}
+
+===== Example: Add Perimeter =====
+
+This example demonstrates adding a simple square perimeter to a mesh.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Mesh Summary:
+  Vertices:   4
+  Triangles:  0
+  Perimeters: 1
+  Holes:      0
+
+Vertices:
+  [0] (0, 0)
+  [1] (10, 0)
+  [2] (10, 10)
+  [3] (0, 10)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+===== Example: Two Holes Inside Perimeter (Should Work) =====
+
+This example demonstrates adding two non-intersecting holes inside a perimeter.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Adding first hole...
+SUCCESS: Added first hole with 4 vertices
+
+Adding second hole...
+SUCCESS: Added second hole with 4 vertices
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   12
+  Triangles:  0
+  Perimeters: 1
+  Holes:      2
+
+Vertices:
+  [0] (0, 0)
+  [1] (20, 0)
+  [2] (20, 20)
+  [3] (0, 20)
+  [4] (2, 2)
+  [5] (8, 2)
+  [6] (8, 8)
+  [7] (2, 8)
+  [8] (12, 12)
+  [9] (18, 12)
+  [10] (18, 18)
+  [11] (12, 18)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+Holes:
+  [0] PolygonLoop{4, 5, 6, 7}
+  [1] PolygonLoop{8, 9, 10, 11}
+
+===== Example: Hole Inside Perimeter (Should Work) =====
+
+This example demonstrates adding a valid hole inside a perimeter.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Attempting to add hole inside perimeter...
+SUCCESS: Added hole with 4 vertices
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   8
+  Triangles:  0
+  Perimeters: 1
+  Holes:      1
+
+Vertices:
+  [0] (0, 0)
+  [1] (10, 0)
+  [2] (10, 10)
+  [3] (0, 10)
+  [4] (2, 2)
+  [5] (8, 2)
+  [6] (8, 8)
+  [7] (2, 8)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+Holes:
+  [0] PolygonLoop{4, 5, 6, 7}
+
+===== Example: Intersecting Holes (Should Fail) =====
+
+This example demonstrates that intersecting holes are rejected.
+
+SUCCESS: Added perimeter with 4 vertices
+
+Adding first hole...
+SUCCESS: Added first hole with 4 vertices
+
+Attempting to add second hole that intersects first hole...
+EXPECTED ERROR: gomesh: hole intersects with existing hole
+
+SUCCESS: Intersecting holes were correctly rejected!
+
+Final mesh state:
+Mesh Summary:
+  Vertices:   12
+  Triangles:  0
+  Perimeters: 1
+  Holes:      1
+
+Vertices:
+  [0] (0, 0)
+  [1] (20, 0)
+  [2] (20, 20)
+  [3] (0, 20)
+  [4] (2, 2)
+  [5] (12, 2)
+  [6] (12, 12)
+  [7] (2, 12)
+  [8] (8, 8)
+  [9] (18, 8)
+  [10] (18, 18)
+  [11] (8, 18)
+
+Perimeters:
+  [0] PolygonLoop{0, 1, 2, 3}
+
+Holes:
+  [0] PolygonLoop{4, 5, 6, 7}
+

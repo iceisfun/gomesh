@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // VertexIDString renders a vertex ID for debugging.

@@ -1,6 +1,6 @@
 package predicates
 
-import "gomesh/types"
+import "github.com/iceisfun/gomesh/types"
 
 // PointInPolygonRayCast tests if a point is inside a polygon using ray casting.
 func PointInPolygonRayCast(p types.Point, poly []types.Point, eps float64) bool {

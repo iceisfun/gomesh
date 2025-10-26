@@ -1,8 +1,8 @@
 package mesh
 
 import (
-	"gomesh/spatial"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/spatial"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // NewMesh creates a new empty mesh with the given options.

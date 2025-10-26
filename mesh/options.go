@@ -1,6 +1,6 @@
 package mesh
 
-import "gomesh/types"
+import "github.com/iceisfun/gomesh/types"
 
 // Option configures a Mesh during construction.
 type Option func(*config)

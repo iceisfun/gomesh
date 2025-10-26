@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"gomesh/formatting"
+	"github.com/iceisfun/gomesh/formatting"
 )
 
 // Print writes a detailed representation of the mesh to the writer.

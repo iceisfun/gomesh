@@ -4,8 +4,8 @@ import (
 	"errors"
 	"math"
 
-	"gomesh/predicates"
-	"gomesh/types"
+	"github.com/iceisfun/gomesh/predicates"
+	"github.com/iceisfun/gomesh/types"
 )
 
 // Config captures validation options required for triangle checks.

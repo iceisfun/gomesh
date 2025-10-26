@@ -1,6 +1,6 @@
 package spatial
 
-import "gomesh/types"
+import "github.com/iceisfun/gomesh/types"
 
 // Index provides spatial queries for vertices.
 type Index interface {
