@@ -1,6 +1,6 @@
 # GoMesh Examples
 
-This directory contains executable examples demonstrating the gomesh library's perimeter and hole functionality.
+This directory contains executable examples demonstrating the gomesh library's functionality including perimeters, holes, and rasterization with alpha blending.
 
 Each example can be run individually using `go run cmd/<example-name>/main.go`.
 
@@ -130,6 +130,49 @@ Each example uses the `mesh.Print(io.Writer)` method to output:
 
 This format makes it easy to verify the state of the mesh and understand the results of each operation.
 
+---
+
+## Rasterization Examples
+
+### 8. rasterize_perimeters_holes
+**Status: Visualization**
+
+Demonstrates rasterization of perimeters and holes with alpha blending.
+
+```bash
+go run cmd/rasterize_perimeters_holes/main.go
+```
+
+**Output:** Creates `perimeters_holes.png` (800x800) showing:
+- Green thick lines for perimeter
+- Red thick lines for holes
+- Black dots for vertices
+
+---
+
+### 9. rasterize_triangles_alpha
+**Status: Visualization**
+
+Demonstrates rasterization with overlapping semi-transparent triangles.
+
+```bash
+go run cmd/rasterize_triangles_alpha/main.go
+```
+
+**Output:** Creates `triangles_alpha.png` (1000x1000) showing:
+- Three overlapping semi-transparent blue triangles
+- Alpha blending where triangles overlap (darker regions)
+- Green perimeter over triangles
+- Red hole over perimeter
+- Black vertices on top
+
+**Key Features:**
+- Proper layer ordering (triangles → edges → perimeters → holes → vertices)
+- Alpha compositing using "over" operation
+- Custom color configuration
+
+---
+
 ## Validation Rules
 
 The examples demonstrate these key validation rules:
@@ -140,3 +183,15 @@ The examples demonstrate these key validation rules:
 4. **Holes cannot contain other holes** - no nested holes allowed
 5. **Holes cannot be inside other holes** - prevents hole-in-hole scenarios
 6. **Polygons cannot self-intersect** - validated for both perimeters and holes
+
+## Rasterization Features
+
+The rasterization examples demonstrate:
+
+1. **Alpha Blending** - Proper alpha compositing (src + dst * (1 - src.alpha))
+2. **Multi-layer Rendering** - Automatic layering of mesh elements
+3. **Color Palettes** - 16 distinct colors for visual differentiation
+4. **Thick Lines** - Anti-aliased thick line rendering with circular brush
+5. **Coordinate Transform** - Automatic scaling and centering of mesh
+
+See `rasterize/README.md` for detailed rasterization API documentation.
