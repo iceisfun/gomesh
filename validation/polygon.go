@@ -214,6 +214,43 @@ func PolygonContains(poly []types.Point, point types.Point, eps float64) bool {
 	return predicates.PointInPolygonRayCast(point, poly, eps)
 }
 
+// ValidatePolygonLoop validates a polygon loop using a vertex provider.
+//
+// This is a convenience function that converts the loop to points and validates.
+//
+// Example:
+//
+//	err := validation.ValidatePolygonLoop(mesh, loop,
+//	    validation.WithPolygonMinArea(50),
+//	    validation.WithRequireCCW(true),
+//	)
+func ValidatePolygonLoop(vp types.VertexProvider, loop types.PolygonLoop, opts ...PolygonOption) error {
+	points := loop.ToPoints(vp)
+	return ValidatePolygon(points, opts...)
+}
+
+// ValidatePolygonLoopDetailed performs detailed validation on a polygon loop.
+//
+// Example:
+//
+//	result := validation.ValidatePolygonLoopDetailed(mesh, loop)
+func ValidatePolygonLoopDetailed(vp types.VertexProvider, loop types.PolygonLoop, opts ...PolygonOption) PolygonValidationResult {
+	points := loop.ToPoints(vp)
+	return ValidatePolygonDetailed(points, opts...)
+}
+
+// PolygonLoopIsValid checks if a polygon loop is valid (no self-intersection).
+//
+// Example:
+//
+//	if validation.PolygonLoopIsValid(mesh, loop, 1e-9) {
+//	    // Loop is valid
+//	}
+func PolygonLoopIsValid(vp types.VertexProvider, loop types.PolygonLoop, eps float64) bool {
+	points := loop.ToPoints(vp)
+	return PolygonIsValid(points, eps)
+}
+
 // PolygonValidationResult holds detailed validation results.
 type PolygonValidationResult struct {
 	Valid            bool

@@ -241,3 +241,77 @@ func PolygonAABBIntersect(poly []types.Point, box types.AABB, eps float64) bool 
 
 	return false
 }
+
+// PolygonLoop-specific functions that work with types.VertexProvider
+
+// PolygonLoopSelfIntersects checks if a polygon loop has self-intersections.
+//
+// The vertex provider (e.g., mesh) is used to resolve vertex coordinates.
+//
+// Example:
+//
+//	if PolygonLoopSelfIntersects(mesh, loop, 1e-9) {
+//	    // Handle self-intersection
+//	}
+func PolygonLoopSelfIntersects(vp types.VertexProvider, loop types.PolygonLoop, eps float64) bool {
+	points := loop.ToPoints(vp)
+	return PolygonSelfIntersects(points, eps)
+}
+
+// PolygonLoopContains tests if a point is inside a polygon loop.
+//
+// Example:
+//
+//	if PolygonLoopContains(mesh, loop, point, 1e-9) {
+//	    // Point is inside
+//	}
+func PolygonLoopContains(vp types.VertexProvider, loop types.PolygonLoop, point types.Point, eps float64) bool {
+	points := loop.ToPoints(vp)
+	return PointInPolygonRayCast(point, points, eps)
+}
+
+// PolygonLoopContainsPolygonLoop tests if polygon loop A contains loop B.
+//
+// Example:
+//
+//	if PolygonLoopContainsPolygonLoop(mesh, outer, inner, 1e-9) {
+//	    // Outer contains inner
+//	}
+func PolygonLoopContainsPolygonLoop(vp types.VertexProvider, a, b types.PolygonLoop, eps float64) bool {
+	pointsA := a.ToPoints(vp)
+	pointsB := b.ToPoints(vp)
+	return PolygonContainsPolygon(pointsA, pointsB, eps)
+}
+
+// PolygonLoopsIntersect tests if two polygon loops intersect.
+//
+// Example:
+//
+//	if PolygonLoopsIntersect(mesh, loop1, loop2, 1e-9) {
+//	    // Loops intersect
+//	}
+func PolygonLoopsIntersect(vp types.VertexProvider, a, b types.PolygonLoop, eps float64) bool {
+	pointsA := a.ToPoints(vp)
+	pointsB := b.ToPoints(vp)
+	return PolygonsIntersect(pointsA, pointsB, eps)
+}
+
+// PolygonLoopArea computes the signed area of a polygon loop.
+//
+// Example:
+//
+//	area := PolygonLoopArea(mesh, loop)
+func PolygonLoopArea(vp types.VertexProvider, loop types.PolygonLoop) float64 {
+	points := loop.ToPoints(vp)
+	return PolygonArea(points)
+}
+
+// PolygonLoopBounds computes the bounding box of a polygon loop.
+//
+// Example:
+//
+//	bounds := PolygonLoopBounds(mesh, loop)
+func PolygonLoopBounds(vp types.VertexProvider, loop types.PolygonLoop) types.AABB {
+	points := loop.ToPoints(vp)
+	return PolygonBounds(points)
+}

@@ -45,3 +45,24 @@ func (p PolygonLoop) Edges() []Edge {
 	}
 	return edges
 }
+
+// VertexProvider is an interface for types that can provide vertex coordinates.
+//
+// This allows PolygonLoop methods to work with any type that stores vertices,
+// such as mesh.Mesh or a simple vertex array.
+type VertexProvider interface {
+	GetVertex(id VertexID) Point
+}
+
+// ToPoints converts the polygon loop to a slice of points using the given vertex provider.
+//
+// Example:
+//
+//	points := loop.ToPoints(mesh)
+func (p PolygonLoop) ToPoints(vp VertexProvider) []Point {
+	points := make([]Point, len(p))
+	for i, vid := range p {
+		points[i] = vp.GetVertex(vid)
+	}
+	return points
+}
