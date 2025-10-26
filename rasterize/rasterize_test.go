@@ -59,10 +59,10 @@ func TestDebugElements(t *testing.T) {
 	// Debug elements now use mesh coordinates (same as vertices: 0-10 range)
 	img, err := Rasterize(m,
 		WithDimensions(400, 400),
-		WithDebugElement("edge1", 0, 0, 10, 0),      // Horizontal edge
-		WithDebugElement("edge2", 10, 0, 5, 10),     // Diagonal edge
-		WithDebugLocation("point1", 5, 5),           // Center point
-		WithDebugLocation("point2", 2.5, 5),         // Another point
+		WithDebugLine("edge1", 0, 0, 10, 0),      // Horizontal edge (new name)
+		WithDebugElement("edge2", 10, 0, 5, 10),  // Diagonal edge (legacy name still works)
+		WithDebugLocation("point1", 5, 5),        // Center point
+		WithDebugLocation("point2", 2.5, 5),      // Another point
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -122,7 +122,7 @@ func TestDebugWithEmptyMesh(t *testing.T) {
 	// Test with debug elements in mesh coordinate space
 	img, err := Rasterize(m,
 		WithDimensions(200, 200),
-		WithDebugElement("test", 10, 10, 90, 90),
+		WithDebugLine("test", 10, 10, 90, 90),
 		WithDebugLocation("loc", 50, 50),
 	)
 	if err != nil {

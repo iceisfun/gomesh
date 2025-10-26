@@ -94,19 +94,19 @@ func WithColors(perimeter, hole, triangle, edge, vertex color.Color) Option {
 	}
 }
 
-// WithDebugElement adds a debug line element to the rasterization config.
+// WithDebugLine adds a debug line to the rasterization config.
 //
 // This can be called multiple times to add multiple debug lines.
-// Each line will be drawn with a label showing the element name.
+// Each line will be drawn with a label showing the line name.
 //
 // Coordinates are in mesh space (same coordinate system as mesh vertices)
 // and will be automatically transformed to image coordinates.
 //
 // Example:
 //
-//	WithDebugElement("edge1", 10.5, 20.3, 100.7, 200.1)
-//	WithDebugElement("edge2", 100.7, 200.1, 150.2, 50.8)
-func WithDebugElement(name string, sourceX, sourceY, targetX, targetY float64) Option {
+//	WithDebugLine("edge1", 10.5, 20.3, 100.7, 200.1)
+//	WithDebugLine("edge2", 100.7, 200.1, 150.2, 50.8)
+func WithDebugLine(name string, sourceX, sourceY, targetX, targetY float64) Option {
 	return func(c *Config) {
 		c.DebugElements = append(c.DebugElements, DebugElement{
 			Name:    name,
@@ -116,6 +116,13 @@ func WithDebugElement(name string, sourceX, sourceY, targetX, targetY float64) O
 			TargetY: targetY,
 		})
 	}
+}
+
+// WithDebugElement is an alias for WithDebugLine.
+//
+// Deprecated: Use WithDebugLine for clarity.
+func WithDebugElement(name string, sourceX, sourceY, targetX, targetY float64) Option {
+	return WithDebugLine(name, sourceX, sourceY, targetX, targetY)
 }
 
 // WithDebugLocation adds a debug location marker to the rasterization config.
