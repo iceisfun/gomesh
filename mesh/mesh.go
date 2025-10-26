@@ -17,6 +17,9 @@ type Mesh struct {
 	edgeSet map[types.Edge]struct{}
 
 	triangleSet map[[3]types.VertexID]types.Triangle
+
+	perimeters []types.PolygonLoop
+	holes      []types.PolygonLoop
 }
 
 // NumVertices returns the number of vertices in the mesh.
