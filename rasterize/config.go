@@ -3,19 +3,21 @@ package rasterize
 import "image/color"
 
 // DebugElement represents a debug line with a label.
+// Coordinates are in mesh space and will be transformed to image coordinates.
 type DebugElement struct {
 	Name    string
-	SourceX int
-	SourceY int
-	TargetX int
-	TargetY int
+	SourceX float64
+	SourceY float64
+	TargetX float64
+	TargetY float64
 }
 
 // DebugLocation represents a debug point location with a label.
+// Coordinates are in mesh space and will be transformed to image coordinates.
 type DebugLocation struct {
 	Name string
-	X    int
-	Y    int
+	X    float64
+	Y    float64
 }
 
 // Config holds options for rasterizing a mesh to an image.

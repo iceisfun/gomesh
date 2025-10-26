@@ -69,8 +69,8 @@ func Rasterize(m *mesh.Mesh, opts ...Option) (*image.RGBA, error) {
 	}
 
 	// Layer 6: Debug elements (lines and locations on top)
-	renderDebugElements(img, cfg)
-	renderDebugLocations(img, cfg)
+	renderDebugElements(img, cfg, transform)
+	renderDebugLocations(img, cfg, transform)
 
 	return img, nil
 }
@@ -354,7 +354,7 @@ func clampInt(v, min, max int) int {
 }
 
 // renderDebugElements draws debug lines with labels.
-func renderDebugElements(img *image.RGBA, cfg Config) {
+func renderDebugElements(img *image.RGBA, cfg Config, transform Transform) {
 	if len(cfg.DebugElements) == 0 {
 		return
 	}
@@ -363,12 +363,16 @@ func renderDebugElements(img *image.RGBA, cfg Config) {
 	debugColor := color.RGBA{R: 255, G: 0, B: 255, A: 255}
 
 	for _, elem := range cfg.DebugElements {
+		// Transform mesh coordinates to image coordinates
+		sx, sy := transform.Apply(types.Point{X: elem.SourceX, Y: elem.SourceY})
+		tx, ty := transform.Apply(types.Point{X: elem.TargetX, Y: elem.TargetY})
+
 		// Draw the line
-		DrawLineThickAlpha(img, elem.SourceX, elem.SourceY, elem.TargetX, elem.TargetY, debugColor, 2)
+		DrawLineThickAlpha(img, sx, sy, tx, ty, debugColor, 2)
 
 		// Draw circles at endpoints
-		DrawCircleAlpha(img, elem.SourceX, elem.SourceY, 3, debugColor)
-		DrawCircleAlpha(img, elem.TargetX, elem.TargetY, 3, debugColor)
+		DrawCircleAlpha(img, sx, sy, 3, debugColor)
+		DrawCircleAlpha(img, tx, ty, 3, debugColor)
 
 		// Note: Label rendering would go here when text rendering is implemented
 		// For now, the distinctive magenta color and circles serve as visual markers
@@ -377,7 +381,7 @@ func renderDebugElements(img *image.RGBA, cfg Config) {
 }
 
 // renderDebugLocations draws debug location markers with labels.
-func renderDebugLocations(img *image.RGBA, cfg Config) {
+func renderDebugLocations(img *image.RGBA, cfg Config, transform Transform) {
 	if len(cfg.DebugLocations) == 0 {
 		return
 	}
@@ -386,13 +390,16 @@ func renderDebugLocations(img *image.RGBA, cfg Config) {
 	debugColor := color.RGBA{R: 0, G: 255, B: 255, A: 255}
 
 	for _, loc := range cfg.DebugLocations {
+		// Transform mesh coordinates to image coordinates
+		x, y := transform.Apply(types.Point{X: loc.X, Y: loc.Y})
+
 		// Draw concentric circles to make the location stand out
-		DrawCircleAlpha(img, loc.X, loc.Y, 5, debugColor)
-		DrawCircleAlpha(img, loc.X, loc.Y, 7, debugColor)
-		DrawCircleAlpha(img, loc.X, loc.Y, 9, debugColor)
+		DrawCircleAlpha(img, x, y, 5, debugColor)
+		DrawCircleAlpha(img, x, y, 7, debugColor)
+		DrawCircleAlpha(img, x, y, 9, debugColor)
 
 		// Draw a center point
-		DrawPointAlpha(img, loc.X, loc.Y, debugColor)
+		DrawPointAlpha(img, x, y, debugColor)
 
 		// Note: Label rendering would go here when text rendering is implemented
 		_ = loc.Name // Label will be used when text rendering is available

@@ -56,12 +56,13 @@ func TestDebugElements(t *testing.T) {
 	c, _ := m.AddVertex(types.Point{5, 10})
 	m.AddTriangle(a, b, c)
 
+	// Debug elements now use mesh coordinates (same as vertices: 0-10 range)
 	img, err := Rasterize(m,
 		WithDimensions(400, 400),
-		WithDebugElement("edge1", 50, 50, 100, 100),
-		WithDebugElement("edge2", 100, 100, 150, 50),
-		WithDebugLocation("point1", 200, 200),
-		WithDebugLocation("point2", 250, 250),
+		WithDebugElement("edge1", 0, 0, 10, 0),      // Horizontal edge
+		WithDebugElement("edge2", 10, 0, 5, 10),     // Diagonal edge
+		WithDebugLocation("point1", 5, 5),           // Center point
+		WithDebugLocation("point2", 2.5, 5),         // Another point
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -114,10 +115,14 @@ func TestDebugElements(t *testing.T) {
 func TestDebugWithEmptyMesh(t *testing.T) {
 	m := mesh.NewMesh()
 
-	// Test with debug elements but no mesh content
+	// Add at least one vertex so transform is computed properly
+	m.AddVertex(types.Point{0, 0})
+	m.AddVertex(types.Point{100, 100})
+
+	// Test with debug elements in mesh coordinate space
 	img, err := Rasterize(m,
 		WithDimensions(200, 200),
-		WithDebugElement("test", 10, 10, 100, 100),
+		WithDebugElement("test", 10, 10, 90, 90),
 		WithDebugLocation("loc", 50, 50),
 	)
 	if err != nil {

@@ -99,11 +99,14 @@ func WithColors(perimeter, hole, triangle, edge, vertex color.Color) Option {
 // This can be called multiple times to add multiple debug lines.
 // Each line will be drawn with a label showing the element name.
 //
+// Coordinates are in mesh space (same coordinate system as mesh vertices)
+// and will be automatically transformed to image coordinates.
+//
 // Example:
 //
-//	WithDebugElement("edge1", 10, 20, 100, 200)
-//	WithDebugElement("edge2", 100, 200, 150, 50)
-func WithDebugElement(name string, sourceX, sourceY, targetX, targetY int) Option {
+//	WithDebugElement("edge1", 10.5, 20.3, 100.7, 200.1)
+//	WithDebugElement("edge2", 100.7, 200.1, 150.2, 50.8)
+func WithDebugElement(name string, sourceX, sourceY, targetX, targetY float64) Option {
 	return func(c *Config) {
 		c.DebugElements = append(c.DebugElements, DebugElement{
 			Name:    name,
@@ -120,11 +123,14 @@ func WithDebugElement(name string, sourceX, sourceY, targetX, targetY int) Optio
 // This can be called multiple times to add multiple debug locations.
 // Each location will be rendered as a circle with a label.
 //
+// Coordinates are in mesh space (same coordinate system as mesh vertices)
+// and will be automatically transformed to image coordinates.
+//
 // Example:
 //
-//	WithDebugLocation("vertex0", 50, 50)
-//	WithDebugLocation("centroid", 100, 100)
-func WithDebugLocation(name string, x, y int) Option {
+//	WithDebugLocation("vertex0", 50.5, 50.3)
+//	WithDebugLocation("centroid", 100.2, 100.8)
+func WithDebugLocation(name string, x, y float64) Option {
 	return func(c *Config) {
 		c.DebugLocations = append(c.DebugLocations, DebugLocation{
 			Name: name,
