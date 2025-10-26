@@ -280,3 +280,47 @@ func TestToPoints(t *testing.T) {
 		}
 	}
 }
+
+// TestPolygonLoopReversedFlipsWinding tests that reversing flips winding direction
+func TestPolygonLoopReversedFlipsWinding(t *testing.T) {
+	m := mesh.NewMesh()
+
+	// Create CCW square (positive area)
+	v0, _ := m.AddVertex(types.Point{X: 0, Y: 0})
+	v1, _ := m.AddVertex(types.Point{X: 10, Y: 0})
+	v2, _ := m.AddVertex(types.Point{X: 10, Y: 10})
+	v3, _ := m.AddVertex(types.Point{X: 0, Y: 10})
+
+	ccwLoop := types.NewPolygonLoop(v0, v1, v2, v3)
+	cwLoop := ccwLoop.Reversed()
+
+	// Compute areas
+	ccwArea := predicates.PolygonLoopArea(m, ccwLoop)
+	cwArea := predicates.PolygonLoopArea(m, cwLoop)
+
+	// CCW should have positive area
+	if ccwArea <= 0 {
+		t.Errorf("CCW loop area should be positive, got %f", ccwArea)
+	}
+
+	// CW should have negative area
+	if cwArea >= 0 {
+		t.Errorf("CW loop area should be negative, got %f", cwArea)
+	}
+
+	// Areas should have same magnitude but opposite sign
+	if ccwArea != -cwArea {
+		t.Errorf("Areas should be opposite: CCW=%f, CW=%f", ccwArea, cwArea)
+	}
+
+	// Double reversal should give original area
+	doubleReversed := cwLoop.Reversed()
+	doubleReversedArea := predicates.PolygonLoopArea(m, doubleReversed)
+	if doubleReversedArea != ccwArea {
+		t.Errorf("Double reversal should restore original area: original=%f, double=%f", ccwArea, doubleReversedArea)
+	}
+
+	t.Logf("CCW area: %f (positive)", ccwArea)
+	t.Logf("CW area: %f (negative)", cwArea)
+	t.Logf("Double reversed area: %f", doubleReversedArea)
+}

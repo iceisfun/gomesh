@@ -35,6 +35,15 @@ func WithPolygonEpsilon(eps float64) PolygonOption {
 }
 
 // WithPolygonMinArea sets the minimum allowed area.
+//
+// This checks the absolute value of the polygon's area, so it works for both
+// CCW (positive area) and CW (negative area) polygons. Polygons with an absolute
+// area smaller than minArea will be considered invalid (degenerate).
+//
+// Example:
+//
+//	// Require at least 100 square units
+//	err := validation.ValidatePolygonLoop(mesh, loop, validation.WithPolygonMinArea(100))
 func WithPolygonMinArea(area float64) PolygonOption {
 	return func(c *PolygonConfig) {
 		c.MinArea = area

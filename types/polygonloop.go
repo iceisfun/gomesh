@@ -66,3 +66,28 @@ func (p PolygonLoop) ToPoints(vp VertexProvider) []Point {
 	}
 	return points
 }
+
+// Reversed returns a new PolygonLoop with vertices in reverse order.
+//
+// This flips the winding direction:
+//   - CCW (counter-clockwise) becomes CW (clockwise)
+//   - CW becomes CCW
+//
+// The method is non-mutating and returns a new PolygonLoop.
+//
+// Example:
+//
+//	loop := types.NewPolygonLoop(v0, v1, v2, v3)
+//	// If loop has CW winding (negative area)
+//	ccwLoop := loop.Reversed() // Now has CCW winding (positive area)
+func (p PolygonLoop) Reversed() PolygonLoop {
+	if len(p) == 0 {
+		return PolygonLoop{}
+	}
+
+	reversed := make(PolygonLoop, len(p))
+	for i := 0; i < len(p); i++ {
+		reversed[i] = p[len(p)-1-i]
+	}
+	return reversed
+}
