@@ -43,6 +43,11 @@ func (m *Mesh) AddPerimeter(points []types.Point) (types.PolygonLoop, error) {
 		return nil, fmt.Errorf("gomesh: perimeter validation failed: %w", err)
 	}
 
+	// Validate the perimeter doesn't overlap with existing perimeters
+	if err := m.validatePerimeterNotOverlapping(loop); err != nil {
+		return nil, err
+	}
+
 	// Track this as a perimeter
 	if m.perimeters == nil {
 		m.perimeters = []types.PolygonLoop{}
@@ -141,6 +146,37 @@ func (m *Mesh) validatePolygonLoop(loop types.PolygonLoop) error {
 			intersects, proper := predicates.SegmentsIntersect(p1, p2, p3, p4, m.cfg.epsilon)
 			if intersects && proper {
 				return fmt.Errorf("polygon self-intersects")
+			}
+		}
+	}
+
+	return nil
+}
+
+// validatePerimeterNotOverlapping checks that the new perimeter doesn't overlap with existing perimeters
+func (m *Mesh) validatePerimeterNotOverlapping(newPerimeter types.PolygonLoop) error {
+	for _, existingPerimeter := range m.perimeters {
+		// Check if any edges intersect
+		newEdges := newPerimeter.Edges()
+		existingEdges := existingPerimeter.Edges()
+
+		for _, e1 := range newEdges {
+			for _, e2 := range existingEdges {
+				// Skip if edges share a vertex
+				if e1.V1() == e2.V1() || e1.V1() == e2.V2() ||
+					e1.V2() == e2.V1() || e1.V2() == e2.V2() {
+					continue
+				}
+
+				p1 := m.vertices[e1.V1()]
+				p2 := m.vertices[e1.V2()]
+				p3 := m.vertices[e2.V1()]
+				p4 := m.vertices[e2.V2()]
+
+				intersects, _ := predicates.SegmentsIntersect(p1, p2, p3, p4, m.cfg.epsilon)
+				if intersects {
+					return fmt.Errorf("gomesh: perimeter overlaps with existing perimeter")
+				}
 			}
 		}
 	}
