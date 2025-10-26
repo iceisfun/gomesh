@@ -197,6 +197,23 @@ func PolygonIsValid(poly []types.Point, eps float64) bool {
 	return !predicates.PolygonSelfIntersects(poly, eps)
 }
 
+// PolygonContains tests if a point is inside a polygon.
+//
+// This is a user-facing convenience wrapper around predicates.PointInPolygonRayCast.
+//
+// Returns true if the point is inside the polygon or on its boundary.
+//
+// Example:
+//
+//	polygon := []types.Point{{0,0}, {10,0}, {10,10}, {0,10}}
+//	point := types.Point{X: 5, Y: 5}
+//	if validation.PolygonContains(polygon, point, 1e-9) {
+//	    // Point is inside polygon
+//	}
+func PolygonContains(poly []types.Point, point types.Point, eps float64) bool {
+	return predicates.PointInPolygonRayCast(point, poly, eps)
+}
+
 // PolygonValidationResult holds detailed validation results.
 type PolygonValidationResult struct {
 	Valid            bool
