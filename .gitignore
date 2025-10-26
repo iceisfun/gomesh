@@ -1,3 +1,4 @@
 **/*.png
+*.png
 tmp
 .gocache
