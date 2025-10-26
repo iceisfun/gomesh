@@ -2,6 +2,7 @@ package validation
 
 import (
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/iceisfun/gomesh/predicates"
@@ -961,4 +962,56 @@ func TestMultipleConstraints(t *testing.T) {
 	if err == nil {
 		t.Error("Expected validation to fail on minimum area")
 	}
+}
+
+// TestPolygonValidationResultString tests the String method
+func TestPolygonValidationResultString(t *testing.T) {
+	// Valid polygon
+	validPoly := []types.Point{
+		{X: 0, Y: 0},
+		{X: 10, Y: 0},
+		{X: 10, Y: 10},
+		{X: 0, Y: 10},
+	}
+
+	result := ValidatePolygonDetailed(validPoly)
+	str := result.String()
+
+	// Should contain key information
+	if !strings.Contains(str, "vertices=4") {
+		t.Errorf("String should contain vertex count, got: %s", str)
+	}
+	if !strings.Contains(str, "area=100") {
+		t.Errorf("String should contain area, got: %s", str)
+	}
+	if !strings.Contains(str, "winding=CCW") {
+		t.Errorf("String should contain winding direction, got: %s", str)
+	}
+
+	// Invalid polygon (too small area)
+	result = ValidatePolygonDetailed(validPoly, WithPolygonMinArea(200))
+	str = result.String()
+
+	if !strings.Contains(str, "area") && !strings.Contains(str, "minimum") {
+		t.Errorf("String should contain error message about area, got: %s", str)
+	}
+
+	// Self-intersecting polygon
+	bowtie := []types.Point{
+		{X: 0, Y: 0},
+		{X: 10, Y: 0},
+		{X: 0, Y: 10},
+		{X: 10, Y: 10},
+	}
+
+	result = ValidatePolygonDetailed(bowtie)
+	str = result.String()
+
+	if !strings.Contains(str, "self-intersects=true") {
+		t.Errorf("String should indicate self-intersection, got: %s", str)
+	}
+
+	t.Logf("Valid polygon: %s", ValidatePolygonDetailed(validPoly).String())
+	t.Logf("Invalid area: %s", ValidatePolygonDetailed(validPoly, WithPolygonMinArea(200)).String())
+	t.Logf("Self-intersecting: %s", ValidatePolygonDetailed(bowtie).String())
 }

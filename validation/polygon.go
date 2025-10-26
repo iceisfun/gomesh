@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/iceisfun/gomesh/predicates"
 	"github.com/iceisfun/gomesh/types"
@@ -262,6 +263,36 @@ type PolygonValidationResult struct {
 	Bounds           types.AABB
 	IsCCW            bool
 	SelfIntersects   bool
+}
+
+// String returns a human-readable description of the validation result.
+//
+// This is useful for error messages and debugging.
+func (r PolygonValidationResult) String() string {
+	var parts []string
+
+	if r.Error != nil {
+		parts = append(parts, r.Error.Error())
+	}
+
+	parts = append(parts, fmt.Sprintf("vertices=%d", r.VertexCount))
+	parts = append(parts, fmt.Sprintf("area=%.6g", r.Area))
+	parts = append(parts, fmt.Sprintf("size=%.6gx%.6g", r.Width, r.Height))
+
+	if r.IsCCW {
+		parts = append(parts, "winding=CCW")
+	} else {
+		parts = append(parts, "winding=CW")
+	}
+
+	if r.SelfIntersects {
+		parts = append(parts, "self-intersects=true")
+	}
+
+	parts = append(parts, fmt.Sprintf("bounds=[%.6g,%.6g to %.6g,%.6g]",
+		r.Bounds.Min.X, r.Bounds.Min.Y, r.Bounds.Max.X, r.Bounds.Max.Y))
+
+	return fmt.Sprintf("{%s}", strings.Join(parts, ", "))
 }
 
 // ValidatePolygonDetailed performs validation and returns detailed results.

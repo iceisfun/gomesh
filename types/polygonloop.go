@@ -10,20 +10,6 @@ package types
 // undefined results in some operations.
 type PolygonLoop []VertexID
 
-func (pl PolygonLoop) Area() float64 {
-	if pl == nil || len(pl) < 3 {
-		return 0.0
-	}
-	area := 0.0
-	n := len(pl)
-	for i := range n {
-		j := (i + 1) % n
-		area += float64(pl[i]) * float64(pl[j])
-		area -= float64(pl[j]) * float64(pl[i])
-	}
-	return area / 2.0
-}
-
 // NewPolygonLoop creates a polygon loop from vertex IDs.
 //
 // The vertices should form a closed loop without repeating the first
