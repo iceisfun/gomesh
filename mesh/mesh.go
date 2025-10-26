@@ -82,3 +82,42 @@ func (m *Mesh) HasTriangleWithKey(key [3]types.VertexID) (types.Triangle, bool) 
 	tri, ok := m.triangleSet[key]
 	return tri, ok
 }
+
+// GetUntriangulatedVertices returns vertices from the given loops that are not part of any triangle.
+//
+// This is useful for identifying areas with missing triangulation during debugging.
+//
+// Example:
+//
+//	loops := []types.PolygonLoop{perimeter, hole1, hole2}
+//	untriangulated := m.GetUntriangulatedVertices(loops)
+//	if len(untriangulated) > 0 {
+//	    fmt.Printf("Found %d untriangulated vertices\n", len(untriangulated))
+//	}
+func (m *Mesh) GetUntriangulatedVertices(loops []types.PolygonLoop) []types.VertexID {
+	// Build set of all vertices used in triangles
+	triangulatedVertices := make(map[types.VertexID]struct{})
+	for _, tri := range m.triangles {
+		triangulatedVertices[tri.V1()] = struct{}{}
+		triangulatedVertices[tri.V2()] = struct{}{}
+		triangulatedVertices[tri.V3()] = struct{}{}
+	}
+
+	// Collect unique vertices from loops
+	loopVertices := make(map[types.VertexID]struct{})
+	for _, loop := range loops {
+		for _, vid := range loop {
+			loopVertices[vid] = struct{}{}
+		}
+	}
+
+	// Find vertices in loops that aren't triangulated
+	var untriangulated []types.VertexID
+	for vid := range loopVertices {
+		if _, ok := triangulatedVertices[vid]; !ok {
+			untriangulated = append(untriangulated, vid)
+		}
+	}
+
+	return untriangulated
+}
