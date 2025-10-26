@@ -30,12 +30,29 @@ func Rasterize(m *mesh.Mesh, opts ...Option) (*image.RGBA, error) {
 
 	transform := computeTransform(m, cfg.Width, cfg.Height)
 
+	// Render in layers from back to front with alpha blending
+
+	// Layer 1: Fill triangles (background layer)
 	if cfg.FillTriangles {
 		renderTriangleFills(img, m, transform, cfg.TriangleColor)
 	}
+
+	// Layer 2: Triangle edges
 	if cfg.DrawEdges {
 		renderEdges(img, m, transform, cfg.EdgeColor)
 	}
+
+	// Layer 3: Perimeters (over triangles)
+	if cfg.DrawPerimeters {
+		renderPerimeters(img, m, transform, cfg.PerimeterColor)
+	}
+
+	// Layer 4: Holes (over perimeters)
+	if cfg.DrawHoles {
+		renderHoles(img, m, transform, cfg.HoleColor)
+	}
+
+	// Layer 5: Vertices (top layer for visibility)
 	if cfg.DrawVertices {
 		renderVertices(img, m, transform, cfg.VertexColor)
 	}
@@ -150,7 +167,45 @@ func renderTriangleFills(img *image.RGBA, m *mesh.Mesh, transform Transform, col
 		ax, ay := transform.Apply(a)
 		bx, by := transform.Apply(b)
 		cx, cy := transform.Apply(c)
-		fillTriangle(img, ax, ay, bx, by, cx, cy, col)
+		FillTriangleAlpha(img, ax, ay, bx, by, cx, cy, col)
+	}
+}
+
+func renderPerimeters(img *image.RGBA, m *mesh.Mesh, transform Transform, col color.Color) {
+	if col == nil {
+		return
+	}
+	perimeters := m.GetPerimeters()
+	for _, perim := range perimeters {
+		renderPolygonLoop(img, m, transform, perim, col)
+	}
+}
+
+func renderHoles(img *image.RGBA, m *mesh.Mesh, transform Transform, col color.Color) {
+	if col == nil {
+		return
+	}
+	holes := m.GetHoles()
+	for _, hole := range holes {
+		renderPolygonLoop(img, m, transform, hole, col)
+	}
+}
+
+func renderPolygonLoop(img *image.RGBA, m *mesh.Mesh, transform Transform, loop types.PolygonLoop, col color.Color) {
+	if len(loop) < 2 {
+		return
+	}
+
+	// Draw each edge of the polygon loop
+	for i := 0; i < len(loop); i++ {
+		v1 := m.GetVertex(loop[i])
+		v2 := m.GetVertex(loop[(i+1)%len(loop)])
+
+		x1, y1 := transform.Apply(v1)
+		x2, y2 := transform.Apply(v2)
+
+		// Use thicker line for perimeters/holes
+		DrawLineThickAlpha(img, x1, y1, x2, y2, col, 2)
 	}
 }
 
@@ -162,9 +217,12 @@ func renderEdges(img *image.RGBA, m *mesh.Mesh, transform Transform, col color.C
 		a := m.GetVertex(tri.V1())
 		b := m.GetVertex(tri.V2())
 		c := m.GetVertex(tri.V3())
-		drawLine(img, transform, a, b, col)
-		drawLine(img, transform, b, c, col)
-		drawLine(img, transform, c, a, col)
+		x1, y1 := transform.Apply(a)
+		x2, y2 := transform.Apply(b)
+		x3, y3 := transform.Apply(c)
+		DrawLineAlpha(img, x1, y1, x2, y2, col)
+		DrawLineAlpha(img, x2, y2, x3, y3, col)
+		DrawLineAlpha(img, x3, y3, x1, y1, col)
 	}
 }
 
@@ -175,7 +233,7 @@ func renderVertices(img *image.RGBA, m *mesh.Mesh, transform Transform, col colo
 	for i := 0; i < m.NumVertices(); i++ {
 		p := m.GetVertex(types.VertexID(i))
 		x, y := transform.Apply(p)
-		drawPoint(img, x, y, col)
+		DrawPointAlpha(img, x, y, col)
 	}
 }
 
