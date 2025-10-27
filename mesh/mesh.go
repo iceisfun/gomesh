@@ -83,6 +83,20 @@ func (m *Mesh) HasTriangleWithKey(key [3]types.VertexID) (types.Triangle, bool) 
 	return tri, ok
 }
 
+// EdgeUsageCounts returns a map of each edge to the number of triangles using it.
+//
+// In a valid triangulation, each edge should be used by at most 2 triangles.
+func (m *Mesh) EdgeUsageCounts() map[types.Edge]int {
+	counts := make(map[types.Edge]int)
+	for _, tri := range m.triangles {
+		edges := tri.Edges()
+		for _, edge := range edges {
+			counts[edge]++
+		}
+	}
+	return counts
+}
+
 // GetUntriangulatedVertices returns vertices from the given loops that are not part of any triangle.
 //
 // This is useful for identifying areas with missing triangulation during debugging.

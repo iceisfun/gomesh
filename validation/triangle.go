@@ -22,6 +22,7 @@ type MeshProvider interface {
 	NumVertices() int
 	GetVertex(types.VertexID) types.Point
 	EdgeSet() map[types.Edge]struct{}
+	EdgeUsageCounts() map[types.Edge]int
 	HasTriangleWithKey([3]types.VertexID) (types.Triangle, bool)
 }
 

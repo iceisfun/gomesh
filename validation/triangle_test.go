@@ -27,6 +27,16 @@ func (m *mockMesh) GetVertex(id types.VertexID) types.Point { return m.vertices[
 
 func (m *mockMesh) EdgeSet() map[types.Edge]struct{} { return m.edgeSet }
 
+func (m *mockMesh) EdgeUsageCounts() map[types.Edge]int {
+	counts := make(map[types.Edge]int)
+	for _, tri := range m.triangles {
+		for _, edge := range tri.Edges() {
+			counts[edge]++
+		}
+	}
+	return counts
+}
+
 func (m *mockMesh) HasTriangleWithKey(key [3]types.VertexID) (types.Triangle, bool) {
 	t, ok := m.triangles[key]
 	return t, ok
