@@ -318,6 +318,30 @@ func (m *Mesh) edgeGoesOutsidePerimeter(v1, v2 types.VertexID) bool {
 		return false
 	}
 
+	edge := types.NewEdge(v1, v2)
+
+	// Check if this edge is exactly on a perimeter boundary (allowed)
+	for _, perim := range m.perimeters {
+		for i := 0; i < len(perim); i++ {
+			next := (i + 1) % len(perim)
+			boundaryEdge := types.NewEdge(perim[i], perim[next])
+			if edge == boundaryEdge {
+				return false // Edge is on perimeter, allowed
+			}
+		}
+	}
+
+	// Check if this edge is exactly on a hole boundary (allowed)
+	for _, hole := range m.holes {
+		for i := 0; i < len(hole); i++ {
+			next := (i + 1) % len(hole)
+			boundaryEdge := types.NewEdge(hole[i], hole[next])
+			if edge == boundaryEdge {
+				return false // Edge is on hole boundary, allowed
+			}
+		}
+	}
+
 	a := m.vertices[v1]
 	b := m.vertices[v2]
 

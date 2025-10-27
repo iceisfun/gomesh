@@ -85,6 +85,10 @@ func (m *Mesh) translateValidationError(err error) error {
 //
 // Edges that land exactly on a perimeter/hole edge are allowed (they share the same edge).
 // Only proper intersections (crossing) are rejected.
+//
+// Additionally checks that:
+//   - Triangle edges don't go outside the perimeter (edge midpoint must be inside)
+//   - Triangle interior doesn't go outside the perimeter (centroid must be inside)
 func (m *Mesh) validateEdgesDoNotCrossPerimeters(tri types.Triangle) error {
 	triEdges := tri.Edges()
 
@@ -126,6 +130,21 @@ func (m *Mesh) validateEdgesDoNotCrossPerimeters(tri types.Triangle) error {
 				}
 			}
 		}
+	}
+
+	// Check if any triangle edge goes outside the perimeter (via midpoint check)
+	for _, edge := range triEdges {
+		if m.edgeGoesOutsidePerimeter(edge.V1(), edge.V2()) {
+			return ErrEdgeCrossesPerimeter
+		}
+	}
+
+	// Check if triangle interior goes outside the perimeter (via centroid check)
+	a := m.vertices[tri.V1()]
+	b := m.vertices[tri.V2()]
+	c := m.vertices[tri.V3()]
+	if m.triangleGoesOutsidePerimeter(a, b, c) {
+		return ErrEdgeCrossesPerimeter
 	}
 
 	return nil

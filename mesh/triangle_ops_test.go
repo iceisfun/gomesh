@@ -148,7 +148,10 @@ func TestEdgeCannotCrossPerimeter(t *testing.T) {
 }
 
 func TestEdgeCannotCrossHole(t *testing.T) {
-	m := NewMesh(WithEdgeCannotCrossPerimeter(true))
+	m := NewMesh(
+		WithEdgeCannotCrossPerimeter(true),
+		WithMergeVertices(true),
+	)
 
 	// Create outer perimeter
 	_, err := m.AddPerimeter([]types.Point{{0, 0}, {20, 0}, {20, 20}, {0, 20}})
@@ -269,5 +272,61 @@ func TestOverlapTriangleAllowed(t *testing.T) {
 	// Should have 2 triangles (duplicates allowed)
 	if m.NumTriangles() != 2 {
 		t.Fatalf("expected 2 triangles (duplicates), got %d", m.NumTriangles())
+	}
+}
+
+func TestTriangleSpanningConcavePerimeter(t *testing.T) {
+	// This test reproduces a bug where a triangle can span across a concave
+	// perimeter section, with part inside and part outside the perimeter
+	m := NewMesh(
+		WithEpsilon(1e-9),
+		WithMergeVertices(true),
+		WithEdgeIntersectionCheck(true),
+		WithTriangleEnforceNoVertexInside(true),
+		WithEdgeCannotCrossPerimeter(true),
+		WithOverlapTriangle(false),
+	)
+
+	perimeter := []types.Point{
+		{X: 1.000, Y: 1.000},   // 0: bottom left
+		{X: 54.000, Y: 1.000},  // 1: bottom right
+		{X: 54.000, Y: 9.000},  // 2: top right
+		{X: 50.000, Y: 9.000},  // 3: start of concave indent
+		{X: 50.000, Y: 7.000},  // 4: down into indent
+		{X: 49.000, Y: 6.000},  // 5: bottom of indent
+		{X: 40.000, Y: 6.000},  // 6: bottom of indent
+		{X: 39.000, Y: 7.000},  // 7: back up from indent
+		{X: 39.000, Y: 9.000},  // 8: end of concave indent
+		{X: 1.000, Y: 9.000},   // 9: top left
+	}
+
+	_, err := m.AddPerimeter(perimeter)
+	if err != nil {
+		t.Fatalf("failed to add perimeter: %v", err)
+	}
+
+	// Triangle 2,4,8 spans across the concave section at the top
+	// Vertices:
+	//   2: (54, 9) - top right corner
+	//   4: (50, 7) - right side of concave section
+	//   8: (39, 9) - left side of concave section
+	//
+	// The edge from vertex 8 (39,9) to vertex 2 (54,9) is a horizontal line
+	// at y=9 that spans across the concave indent (which dips down to y=6).
+	// The midpoint of this edge is at (46.5, 9), which is OUTSIDE the
+	// perimeter because the perimeter dips down in that region.
+	//
+	// This triangle should be REJECTED because part of it extends outside
+	// the perimeter boundary.
+	err = m.AddTriangle(2, 4, 8)
+	if err == nil {
+		t.Error("Expected error when adding triangle that spans outside concave perimeter, got nil")
+	} else if err != ErrEdgeCrossesPerimeter {
+		t.Logf("Got error (expected ErrEdgeCrossesPerimeter): %v", err)
+	}
+
+	// Verify no triangles were added
+	if m.NumTriangles() != 0 {
+		t.Errorf("Expected 0 triangles after failed add, got %d", m.NumTriangles())
 	}
 }
