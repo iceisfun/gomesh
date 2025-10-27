@@ -64,6 +64,11 @@ func (m *Mesh) VertexFindCandidates(v types.VertexID) []CandidateVertex {
 			return
 		}
 
+		// Check if edge stays inside perimeter (doesn't go outside in concave sections)
+		if m.edgeGoesOutsidePerimeter(v, targetID) {
+			return
+		}
+
 		// Check if edge would cross any existing triangle edge
 		if m.edgeCrossesAnyTriangleEdge(v, targetID) {
 			return
@@ -292,4 +297,61 @@ func (m *Mesh) validateTriangleCandidate(tri types.Triangle, a, b, c types.Point
 	}
 
 	return nil
+}
+
+// edgeGoesOutsidePerimeter checks if an edge goes outside the perimeter boundary.
+//
+// This catches cases where an edge connects two vertices on a concave perimeter
+// but the edge itself passes through the exterior region.
+//
+// Returns true if:
+//   - There are perimeters and the edge midpoint is outside all of them
+//   - The edge midpoint is inside any hole
+func (m *Mesh) edgeGoesOutsidePerimeter(v1, v2 types.VertexID) bool {
+	// If no perimeters, no constraint
+	if len(m.perimeters) == 0 {
+		return false
+	}
+
+	a := m.vertices[v1]
+	b := m.vertices[v2]
+
+	// Calculate edge midpoint
+	midpoint := types.Point{
+		X: (a.X + b.X) / 2.0,
+		Y: (a.Y + b.Y) / 2.0,
+	}
+
+	// Check if midpoint is inside at least one perimeter
+	insideAnyPerimeter := false
+	for _, perim := range m.perimeters {
+		perimPoints := make([]types.Point, len(perim))
+		for i, vid := range perim {
+			perimPoints[i] = m.vertices[vid]
+		}
+
+		if predicates.PointInPolygonRayCast(midpoint, perimPoints, m.cfg.epsilon) {
+			insideAnyPerimeter = true
+			break
+		}
+	}
+
+	// If midpoint is outside all perimeters, edge goes outside
+	if !insideAnyPerimeter {
+		return true
+	}
+
+	// Check if midpoint is inside any hole (which would be invalid)
+	for _, hole := range m.holes {
+		holePoints := make([]types.Point, len(hole))
+		for i, vid := range hole {
+			holePoints[i] = m.vertices[vid]
+		}
+
+		if predicates.PointInPolygonRayCast(midpoint, holePoints, m.cfg.epsilon) {
+			return true // Edge goes through a hole
+		}
+	}
+
+	return false
 }
