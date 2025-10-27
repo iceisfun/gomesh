@@ -46,6 +46,19 @@ func WithEdgeIntersectionCheck(enable bool) Option {
 	}
 }
 
+// WithEdgeCannotCrossPerimeter prevents triangle edges from crossing perimeter or hole boundaries.
+//
+// When enabled, triangle edges cannot intersect perimeter or hole edge segments.
+// However, edges that land exactly on a perimeter/hole edge are allowed.
+//
+// This is useful for constrained triangulation where triangles must not cross
+// the boundary polygons.
+func WithEdgeCannotCrossPerimeter(enable bool) Option {
+	return func(c *config) {
+		c.validateEdgeCannotCrossPerimeter = enable
+	}
+}
+
 // WithDuplicateTriangleError rejects triangles with duplicate vertex sets.
 func WithDuplicateTriangleError(enable bool) Option {
 	return func(c *config) {

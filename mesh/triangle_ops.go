@@ -3,6 +3,7 @@ package mesh
 import (
 	"errors"
 
+	"github.com/iceisfun/gomesh/predicates"
 	"github.com/iceisfun/gomesh/types"
 	"github.com/iceisfun/gomesh/validation"
 )
@@ -21,6 +22,13 @@ func (m *Mesh) AddTriangle(v1, v2, v3 types.VertexID) error {
 	err := validation.ValidateTriangle(tri, a, b, c, m.validationConfig(), m)
 	if err != nil {
 		return m.translateValidationError(err)
+	}
+
+	// Check if edges cross perimeter or hole boundaries
+	if m.cfg.validateEdgeCannotCrossPerimeter {
+		if err := m.validateEdgesDoNotCrossPerimeters(tri); err != nil {
+			return err
+		}
 	}
 
 	m.triangles = append(m.triangles, tri)
@@ -71,4 +79,69 @@ func (m *Mesh) translateValidationError(err error) error {
 	default:
 		return err
 	}
+}
+
+// validateEdgesDoNotCrossPerimeters checks if any triangle edge crosses a perimeter or hole boundary.
+//
+// Edges that land exactly on a perimeter/hole edge are allowed (they share the same edge).
+// Only proper intersections (crossing) are rejected.
+func (m *Mesh) validateEdgesDoNotCrossPerimeters(tri types.Triangle) error {
+	triEdges := tri.Edges()
+
+	// Check against all perimeter edges
+	for _, perim := range m.perimeters {
+		for i := 0; i < len(perim); i++ {
+			next := (i + 1) % len(perim)
+			boundaryEdge := types.NewEdge(perim[i], perim[next])
+
+			for _, triEdge := range triEdges {
+				// If the edges are the same (edge lands exactly on boundary), allow it
+				if triEdge == boundaryEdge {
+					continue
+				}
+
+				// Check if triangle edge crosses boundary edge
+				if m.edgesCross(triEdge, boundaryEdge) {
+					return ErrEdgeCrossesPerimeter
+				}
+			}
+		}
+	}
+
+	// Check against all hole edges
+	for _, hole := range m.holes {
+		for i := 0; i < len(hole); i++ {
+			next := (i + 1) % len(hole)
+			boundaryEdge := types.NewEdge(hole[i], hole[next])
+
+			for _, triEdge := range triEdges {
+				// If the edges are the same (edge lands exactly on boundary), allow it
+				if triEdge == boundaryEdge {
+					continue
+				}
+
+				// Check if triangle edge crosses boundary edge
+				if m.edgesCross(triEdge, boundaryEdge) {
+					return ErrEdgeCrossesPerimeter
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// edgesCross checks if two edges cross each other (proper intersection).
+//
+// Returns true only for proper intersections where the edges cross each other.
+// Returns false if edges touch at endpoints or are collinear.
+func (m *Mesh) edgesCross(e1, e2 types.Edge) bool {
+	a1 := m.vertices[e1.V1()]
+	a2 := m.vertices[e1.V2()]
+	b1 := m.vertices[e2.V1()]
+	b2 := m.vertices[e2.V2()]
+
+	// Use the predicates package to check for proper intersection
+	intersects, proper := predicates.SegmentsIntersect(a1, a2, b1, b2, m.cfg.epsilon)
+	return intersects && proper
 }

@@ -23,4 +23,7 @@ var (
 
 	// ErrEdgeIntersection indicates a triangle edge would intersect an existing mesh edge.
 	ErrEdgeIntersection = errors.New("gomesh: edge intersection with existing mesh")
+
+	// ErrEdgeCrossesPerimeter indicates a triangle edge would cross a perimeter or hole boundary.
+	ErrEdgeCrossesPerimeter = errors.New("gomesh: edge crosses perimeter or hole boundary")
 )
