@@ -32,6 +32,16 @@ func (m *Mesh) NumTriangles() int {
 	return len(m.triangles)
 }
 
+// Perimeters returns the list of perimeter loops.
+func (m *Mesh) Perimeters() []types.PolygonLoop {
+	return m.perimeters
+}
+
+// Holes returns the list of hole loops.
+func (m *Mesh) Holes() []types.PolygonLoop {
+	return m.holes
+}
+
 // GetVertex returns the coordinates of a vertex by ID.
 func (m *Mesh) GetVertex(id types.VertexID) types.Point {
 	return m.vertices[id]
