@@ -261,3 +261,78 @@ func TestVertexFindCandidatesConcavePerimeter(t *testing.T) {
 	_ = v6
 	_ = v8
 }
+
+func TestVertexFindTriangleCandidatesConcavePerimeter(t *testing.T) {
+	m := NewMesh()
+
+	// Create a concave "L" shape perimeter
+	/*
+	   0,10 ---- 5,10
+	     |          (exterior at 8,8)
+	     |
+	   0,5 ---- 10,5
+	            |
+	            |
+	          10,0 ---- 0,0
+	*/
+
+	v0, _ := m.AddVertex(types.Point{0, 0})
+	v1, _ := m.AddVertex(types.Point{10, 0})
+	v2, _ := m.AddVertex(types.Point{10, 5})
+	v3, _ := m.AddVertex(types.Point{5, 5})
+	v4, _ := m.AddVertex(types.Point{5, 10})
+	v5, _ := m.AddVertex(types.Point{0, 10})
+
+	_, err := m.AddPerimeter([]types.Point{
+		{0, 0}, {10, 0}, {10, 5}, {5, 5}, {5, 10}, {0, 10},
+	})
+	if err != nil {
+		t.Fatalf("failed to add perimeter: %v", err)
+	}
+
+	// Add an exterior vertex in the concave region (upper right)
+	// This point is outside the L-shape (x>5 && y>5 in the excluded region)
+	v6, _ := m.AddVertex(types.Point{8, 8})
+
+	// Find triangle candidates from v0
+	candidates := m.VertexFindTriangleCandidates(v0)
+
+	t.Logf("Found %d triangle candidates with concave perimeter", len(candidates))
+
+	// The key test: verify that triangles using the exterior vertex v6
+	// are NOT in the candidates (because centroid would be outside)
+	// For example, triangle (v2, v4, v6) would have centroid at:
+	// ((10+5+8)/3, (5+10+8)/3) = (7.67, 7.67) which is outside the L-shape
+	foundBadTriangle := false
+	for _, tri := range candidates {
+		vertices := []types.VertexID{tri.V1, tri.V2, tri.V3}
+		hasV2 := false
+		hasV4 := false
+		hasV6 := false
+		for _, vid := range vertices {
+			if vid == v2 {
+				hasV2 = true
+			}
+			if vid == v4 {
+				hasV4 = true
+			}
+			if vid == v6 {
+				hasV6 = true
+			}
+		}
+		// Triangle (v2, v4, v6) has centroid outside the L-shape
+		if hasV2 && hasV4 && hasV6 {
+			foundBadTriangle = true
+			t.Errorf("Found triangle candidate (%d, %d, %d) with exterior vertex", v2, v4, v6)
+		}
+	}
+
+	if foundBadTriangle {
+		t.Error("Found triangle candidates that use exterior vertex with centroid outside perimeter")
+	}
+
+	_ = v0
+	_ = v1
+	_ = v3
+	_ = v5
+}

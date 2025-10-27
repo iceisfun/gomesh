@@ -296,6 +296,11 @@ func (m *Mesh) validateTriangleCandidate(tri types.Triangle, a, b, c types.Point
 		}
 	}
 
+	// Check if triangle's interior stays inside perimeter
+	if m.triangleGoesOutsidePerimeter(a, b, c) {
+		return ErrEdgeCrossesPerimeter // Reuse this error for consistency
+	}
+
 	return nil
 }
 
@@ -350,6 +355,60 @@ func (m *Mesh) edgeGoesOutsidePerimeter(v1, v2 types.VertexID) bool {
 
 		if predicates.PointInPolygonRayCast(midpoint, holePoints, m.cfg.epsilon) {
 			return true // Edge goes through a hole
+		}
+	}
+
+	return false
+}
+
+// triangleGoesOutsidePerimeter checks if a triangle's interior goes outside the perimeter.
+//
+// This catches cases where all three vertices and edges are valid, but the triangle's
+// interior extends into the exterior region (common with concave perimeters).
+//
+// Returns true if:
+//   - There are perimeters and the triangle's centroid is outside all of them
+//   - The triangle's centroid is inside any hole
+func (m *Mesh) triangleGoesOutsidePerimeter(a, b, c types.Point) bool {
+	// If no perimeters, no constraint
+	if len(m.perimeters) == 0 {
+		return false
+	}
+
+	// Calculate triangle centroid
+	centroid := types.Point{
+		X: (a.X + b.X + c.X) / 3.0,
+		Y: (a.Y + b.Y + c.Y) / 3.0,
+	}
+
+	// Check if centroid is inside at least one perimeter
+	insideAnyPerimeter := false
+	for _, perim := range m.perimeters {
+		perimPoints := make([]types.Point, len(perim))
+		for i, vid := range perim {
+			perimPoints[i] = m.vertices[vid]
+		}
+
+		if predicates.PointInPolygonRayCast(centroid, perimPoints, m.cfg.epsilon) {
+			insideAnyPerimeter = true
+			break
+		}
+	}
+
+	// If centroid is outside all perimeters, triangle goes outside
+	if !insideAnyPerimeter {
+		return true
+	}
+
+	// Check if centroid is inside any hole (which would be invalid)
+	for _, hole := range m.holes {
+		holePoints := make([]types.Point, len(hole))
+		for i, vid := range hole {
+			holePoints[i] = m.vertices[vid]
+		}
+
+		if predicates.PointInPolygonRayCast(centroid, holePoints, m.cfg.epsilon) {
+			return true // Triangle centroid is in a hole
 		}
 	}
 
