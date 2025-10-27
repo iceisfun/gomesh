@@ -1,0 +1,9 @@
+## func {{.Name}} — `{{.Location.Filepath}}:{{.Location.Start.Line}}`
+
+{{/* keep the link text if you still want it clickable: */}}
+{{- /* Example keeping the existing link style but adding the local path */ -}}
+[{{.Name}}]({{.Anchor}})
+
+{{- /* Function signature and doc just like default */ -}}
+{{.Signature}}
+{{template "doc" .Doc}}
