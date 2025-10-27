@@ -184,3 +184,90 @@ func TestEdgeCannotCrossHole(t *testing.T) {
 		t.Fatalf("expected hole crossing error, got %v", err)
 	}
 }
+
+func TestOverlapTriangleDefault(t *testing.T) {
+	// By default, overlapping triangles are allowed
+	m := NewMesh()
+
+	v0, _ := m.AddVertex(types.Point{0, 0})
+	v1, _ := m.AddVertex(types.Point{10, 0})
+	v2, _ := m.AddVertex(types.Point{5, 10})
+
+	_, err := m.AddPerimeter([]types.Point{{0, 0}, {10, 0}, {5, 10}})
+	if err != nil {
+		t.Fatalf("failed to add perimeter: %v", err)
+	}
+
+	// Add triangle with one vertex order
+	if err := m.AddTriangle(v0, v1, v2); err != nil {
+		t.Fatalf("unexpected error adding first triangle: %v", err)
+	}
+
+	// Add same triangle with rotated vertex order (should succeed by default)
+	if err := m.AddTriangle(v1, v2, v0); err != nil {
+		t.Fatalf("expected overlapping triangle to succeed by default, got %v", err)
+	}
+
+	// Should have 2 triangles (duplicates allowed)
+	if m.NumTriangles() != 2 {
+		t.Fatalf("expected 2 triangles (duplicates), got %d", m.NumTriangles())
+	}
+}
+
+func TestOverlapTriangleProhibited(t *testing.T) {
+	// With WithOverlapTriangle(false), overlapping triangles should error
+	m := NewMesh(WithOverlapTriangle(false))
+
+	v0, _ := m.AddVertex(types.Point{0, 0})
+	v1, _ := m.AddVertex(types.Point{10, 0})
+	v2, _ := m.AddVertex(types.Point{5, 10})
+
+	_, err := m.AddPerimeter([]types.Point{{0, 0}, {10, 0}, {5, 10}})
+	if err != nil {
+		t.Fatalf("failed to add perimeter: %v", err)
+	}
+
+	// Add triangle with one vertex order
+	if err := m.AddTriangle(v0, v1, v2); err != nil {
+		t.Fatalf("unexpected error adding first triangle: %v", err)
+	}
+
+	// Try to add same triangle with rotated vertex order (should fail)
+	if err := m.AddTriangle(v1, v2, v0); err != ErrDuplicateTriangle {
+		t.Fatalf("expected duplicate triangle error, got %v", err)
+	}
+
+	// Should have only 1 triangle
+	if m.NumTriangles() != 1 {
+		t.Fatalf("expected 1 triangle, got %d", m.NumTriangles())
+	}
+}
+
+func TestOverlapTriangleAllowed(t *testing.T) {
+	// With WithOverlapTriangle(true), overlapping triangles should be explicitly allowed
+	m := NewMesh(WithOverlapTriangle(true))
+
+	v0, _ := m.AddVertex(types.Point{0, 0})
+	v1, _ := m.AddVertex(types.Point{10, 0})
+	v2, _ := m.AddVertex(types.Point{5, 10})
+
+	_, err := m.AddPerimeter([]types.Point{{0, 0}, {10, 0}, {5, 10}})
+	if err != nil {
+		t.Fatalf("failed to add perimeter: %v", err)
+	}
+
+	// Add triangle with one vertex order
+	if err := m.AddTriangle(v0, v1, v2); err != nil {
+		t.Fatalf("unexpected error adding first triangle: %v", err)
+	}
+
+	// Add same triangle with rotated vertex order (should succeed)
+	if err := m.AddTriangle(v1, v2, v0); err != nil {
+		t.Fatalf("expected overlapping triangle to succeed, got %v", err)
+	}
+
+	// Should have 2 triangles (duplicates allowed)
+	if m.NumTriangles() != 2 {
+		t.Fatalf("expected 2 triangles (duplicates), got %d", m.NumTriangles())
+	}
+}

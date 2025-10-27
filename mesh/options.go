@@ -73,6 +73,31 @@ func WithDuplicateTriangleOpposingWinding(enable bool) Option {
 	}
 }
 
+// WithOverlapTriangle controls whether overlapping/duplicate triangles are allowed.
+//
+// When set to false, adding the same triangle with different vertex orders
+// (e.g., 9,0,1 and 1,0,9) will return ErrDuplicateTriangle.
+//
+// When set to true (default), overlapping triangles are allowed and will be added
+// to the mesh multiple times.
+//
+// Example:
+//
+//	m := NewMesh(WithOverlapTriangle(false))  // Prohibit overlaps
+//	m.AddTriangle(0, 1, 2)  // OK
+//	m.AddTriangle(1, 2, 0)  // Error: ErrDuplicateTriangle
+//
+//	m2 := NewMesh(WithOverlapTriangle(true))  // Allow overlaps (default)
+//	m2.AddTriangle(0, 1, 2)  // OK
+//	m2.AddTriangle(1, 2, 0)  // OK - adds duplicate
+func WithOverlapTriangle(allow bool) Option {
+	return func(c *config) {
+		// When allow=true, we want errorOnDuplicateTriangle=false (allow duplicates)
+		// When allow=false, we want errorOnDuplicateTriangle=true (reject duplicates)
+		c.errorOnDuplicateTriangle = !allow
+	}
+}
+
 // WithDebugAddVertex installs a hook called after vertex insertion.
 func WithDebugAddVertex(hook func(types.VertexID, types.Point)) Option {
 	return func(c *config) {
