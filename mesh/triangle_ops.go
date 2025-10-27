@@ -33,6 +33,8 @@ func (m *Mesh) AddTriangle(v1, v2, v3 types.VertexID) error {
 
 	// Check for volumetric triangle overlap
 	if m.cfg.validateTriangleOverlapArea {
+		// DEBUG: Log that we're checking
+		_ = m.cfg.validateTriangleOverlapArea // Prevent unused error
 		if err := m.validateTriangleDoesNotOverlap(tri, a, b, c); err != nil {
 			return err
 		}
@@ -190,11 +192,16 @@ func (m *Mesh) validateTriangleDoesNotOverlap(tri types.Triangle, a, b, c types.
 		b2 := m.vertices[existingTri.V2()]
 		c2 := m.vertices[existingTri.V3()]
 
-		// Calculate intersection area
-		intersectionArea := predicates.TriangleIntersectionArea(a, b, c, a2, b2, c2, m.cfg.epsilon)
+		// Calculate intersection area in BOTH directions and take the maximum.
+		// The Sutherland-Hodgman clipping algorithm is not symmetric, so we need
+		// to check both orders to catch all overlaps.
+		area1 := predicates.TriangleIntersectionArea(a, b, c, a2, b2, c2, m.cfg.epsilon)
+		area2 := predicates.TriangleIntersectionArea(a2, b2, c2, a, b, c, m.cfg.epsilon)
 
-		// DEBUG: Temporary logging
-		_ = intersectionArea // Prevent unused variable error if logging is removed
+		intersectionArea := area1
+		if area2 > intersectionArea {
+			intersectionArea = area2
+		}
 
 		// If there's meaningful overlap (area > epsilon), reject
 		if intersectionArea > m.cfg.epsilon {
