@@ -21,14 +21,19 @@ func TriangleIntersectionArea(a1, a2, a3, b1, b2, b3 types.Point, eps float64) f
 // Uses Sutherland-Hodgman polygon clipping algorithm.
 // Returns empty slice if triangles don't intersect.
 func TriangleIntersectionPolygon(a1, a2, a3, b1, b2, b3 types.Point, eps float64) []types.Point {
+	// Ensure both triangles are in counter-clockwise order
+	// The Sutherland-Hodgman algorithm requires CCW winding for correct "inside" tests
+	triA := ensureCCW([]types.Point{a1, a2, a3})
+	triB := ensureCCW([]types.Point{b1, b2, b3})
+
 	// Start with triangle A as the subject polygon
-	subject := []types.Point{a1, a2, a3}
+	subject := triA
 
 	// Clip against each edge of triangle B
 	clipEdges := [][2]types.Point{
-		{b1, b2},
-		{b2, b3},
-		{b3, b1},
+		{triB[0], triB[1]},
+		{triB[1], triB[2]},
+		{triB[2], triB[0]},
 	}
 
 	for _, edge := range clipEdges {
@@ -39,6 +44,37 @@ func TriangleIntersectionPolygon(a1, a2, a3, b1, b2, b3 types.Point, eps float64
 	}
 
 	return subject
+}
+
+// ensureCCW ensures a polygon is in counter-clockwise winding order.
+// Returns a new slice with vertices in CCW order.
+func ensureCCW(poly []types.Point) []types.Point {
+	if len(poly) < 3 {
+		return poly
+	}
+
+	// Calculate signed area using shoelace formula
+	// Positive area = CCW, negative area = CW
+	signedArea := 0.0
+	n := len(poly)
+	for i := 0; i < n; i++ {
+		j := (i + 1) % n
+		signedArea += (poly[j].X - poly[i].X) * (poly[j].Y + poly[i].Y)
+	}
+
+	// If area is positive (CW by our formula convention), reverse to make CCW
+	if signedArea > 0 {
+		result := make([]types.Point, n)
+		for i := 0; i < n; i++ {
+			result[i] = poly[n-1-i]
+		}
+		return result
+	}
+
+	// Already CCW, return copy
+	result := make([]types.Point, n)
+	copy(result, poly)
+	return result
 }
 
 // sutherlandHodgmanClip clips a polygon against a single edge using Sutherland-Hodgman algorithm.
