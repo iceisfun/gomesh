@@ -1,6 +1,9 @@
 package mesh
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	// ErrInvalidVertexID indicates a vertex ID is out of range or negative.
@@ -27,3 +30,15 @@ var (
 	// ErrEdgeCrossesPerimeter indicates a triangle edge would cross a perimeter or hole boundary.
 	ErrEdgeCrossesPerimeter = errors.New("gomesh: edge crosses perimeter or hole boundary")
 )
+
+// ErrTriangleOverlap indicates a triangle would overlap with an existing triangle.
+// This error includes details about which triangle it overlaps with and the intersection area.
+type ErrTriangleOverlap struct {
+	TriangleIndex    int
+	IntersectionArea float64
+}
+
+func (e ErrTriangleOverlap) Error() string {
+	return fmt.Sprintf("gomesh: triangle overlaps with existing triangle #%d (intersection area: %.4f)",
+		e.TriangleIndex, e.IntersectionArea)
+}

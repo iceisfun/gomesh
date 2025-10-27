@@ -1,22 +1,30 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/iceisfun/gomesh/mesh"
-	"github.com/iceisfun/gomesh/predicates"
 	"github.com/iceisfun/gomesh/types"
 )
 
+var (
+	generateTests = flag.Bool("generate-tests", false, "Generate test cases for detected overlaps")
+)
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: validate <mesh.json>")
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		fmt.Println("Usage: validate [options] <mesh.json>")
+		fmt.Println("\nOptions:")
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
-	filename := os.Args[1]
+	filename := flag.Arg(0)
 	log.Printf("Loading mesh from %s...", filename)
 
 	m, err := mesh.Load(filename)
@@ -69,20 +77,91 @@ func main() {
 
 	// 3. Check for volumetric/geometric overlaps
 	log.Println("\n=== Checking for geometric overlaps ===")
-	overlaps := findGeometricOverlaps(m)
+	overlaps := m.FindOverlappingTriangles()
 	if len(overlaps) > 0 {
 		log.Printf("❌ Found %d pairs of overlapping triangles", len(overlaps))
+
+		var testCases []*mesh.OverlapTestCase
+
 		for i, overlap := range overlaps {
-			if i >= 5 {
+			if i >= 5 && !*generateTests {
 				log.Printf("   ... and %d more overlaps", len(overlaps)-5)
 				break
 			}
-			t1 := m.GetTriangles()[overlap.idx1]
-			t2 := m.GetTriangles()[overlap.idx2]
-			log.Printf("   Overlap #%d: Triangle #%d [%d,%d,%d] and Triangle #%d [%d,%d,%d]",
-				i+1, overlap.idx1, t1.V1(), t1.V2(), t1.V3(),
-				overlap.idx2, t2.V1(), t2.V2(), t2.V3())
-			log.Printf("      Type: %s", overlap.overlapType)
+
+			// Get triangle coordinates
+			t1v1 := m.GetVertex(overlap.Tri1.V1())
+			t1v2 := m.GetVertex(overlap.Tri1.V2())
+			t1v3 := m.GetVertex(overlap.Tri1.V3())
+
+			t2v1 := m.GetVertex(overlap.Tri2.V1())
+			t2v2 := m.GetVertex(overlap.Tri2.V2())
+			t2v3 := m.GetVertex(overlap.Tri2.V3())
+
+			if i < 5 || *generateTests {
+				log.Printf("   Overlap #%d:", i+1)
+				log.Printf("      Triangle #%d [%d,%d,%d]",
+					overlap.Index1, overlap.Tri1.V1(), overlap.Tri1.V2(), overlap.Tri1.V3())
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri1.V1(), t1v1.X, t1v1.Y)
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri1.V2(), t1v2.X, t1v2.Y)
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri1.V3(), t1v3.X, t1v3.Y)
+
+				log.Printf("      Triangle #%d [%d,%d,%d]",
+					overlap.Index2, overlap.Tri2.V1(), overlap.Tri2.V2(), overlap.Tri2.V3())
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri2.V1(), t2v1.X, t2v1.Y)
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri2.V2(), t2v2.X, t2v2.Y)
+				log.Printf("         v%d: (%.2f, %.2f)", overlap.Tri2.V3(), t2v3.X, t2v3.Y)
+
+				log.Printf("      Type: %s", overlap.Type)
+				log.Printf("      Intersection area: %.4f", overlap.IntersectionArea)
+				if overlap.SharedEdges > 0 {
+					log.Printf("      Shared edges: %d", overlap.SharedEdges)
+				}
+			}
+
+			// Generate test case if requested
+			if *generateTests {
+				testCase, err := m.GenerateOverlapTestCase(overlap)
+				if err != nil {
+					log.Printf("      ⚠️  Failed to generate test case: %v", err)
+				} else {
+					testCases = append(testCases, testCase)
+					if testCase.ActualError != nil {
+						log.Printf("      ✓ Test mesh rejected overlap: %v", testCase.ActualError)
+					} else {
+						log.Printf("      ✗ WARNING: Test mesh did NOT reject overlap!")
+						log.Printf("      This indicates a validation bug - geometric overlap detected but not prevented!")
+					}
+				}
+			}
+		}
+
+		// Print test case generation summary
+		if *generateTests && len(testCases) > 0 {
+			log.Println("\n=== Generated Test Cases ===")
+			rejectedCount := 0
+			acceptedCount := 0
+			for _, tc := range testCases {
+				if tc.ActualError != nil {
+					rejectedCount++
+				} else {
+					acceptedCount++
+				}
+			}
+			log.Printf("Total: %d test cases", len(testCases))
+			log.Printf("  ✓ Correctly rejected: %d", rejectedCount)
+			log.Printf("  ✗ Incorrectly accepted: %d", acceptedCount)
+
+			// Print Go test code for incorrectly accepted overlaps
+			if acceptedCount > 0 {
+				log.Println("\n=== Go Test Code (for validation bugs) ===")
+				for _, tc := range testCases {
+					if tc.ActualError == nil {
+						log.Printf("\n// %s", tc.GenerateHumanReadableReport())
+						log.Println(tc.GenerateGoTestCode())
+					}
+				}
+			}
 		}
 	} else {
 		log.Println("✓ No geometric overlaps found")
@@ -108,11 +187,6 @@ func main() {
 		log.Printf("❌ Mesh has %d types of validation issues", issues)
 		os.Exit(1)
 	}
-}
-
-type overlapInfo struct {
-	idx1, idx2   int
-	overlapType  string
 }
 
 func findDuplicateTriangles(m *mesh.Mesh) [][]int {
@@ -141,98 +215,4 @@ func findDuplicateTriangles(m *mesh.Mesh) [][]int {
 		}
 	}
 	return duplicates
-}
-
-func findGeometricOverlaps(m *mesh.Mesh) []overlapInfo {
-	var overlaps []overlapInfo
-	triangles := m.GetTriangles()
-
-	for i := 0; i < len(triangles); i++ {
-		for j := i + 1; j < len(triangles); j++ {
-			t1 := triangles[i]
-			t2 := triangles[j]
-
-			if overlapType := checkTriangleOverlap(m, t1, t2); overlapType != "" {
-				overlaps = append(overlaps, overlapInfo{
-					idx1:        i,
-					idx2:        j,
-					overlapType: overlapType,
-				})
-			}
-		}
-	}
-
-	return overlaps
-}
-
-func checkTriangleOverlap(m *mesh.Mesh, t1, t2 types.Triangle) string {
-	// Check if they share all 3 vertices (duplicate)
-	sharedVerts := countSharedVertices(t1, t2)
-	if sharedVerts == 3 {
-		return "DUPLICATE (same 3 vertices)"
-	}
-
-	a1 := m.GetVertex(t1.V1())
-	b1 := m.GetVertex(t1.V2())
-	c1 := m.GetVertex(t1.V3())
-
-	a2 := m.GetVertex(t2.V1())
-	b2 := m.GetVertex(t2.V2())
-	c2 := m.GetVertex(t2.V3())
-
-	eps := 1e-9
-
-	// Check if any vertex of t2 is strictly inside t1
-	if predicates.PointStrictlyInTriangle(a2, a1, b1, c1, eps) ||
-		predicates.PointStrictlyInTriangle(b2, a1, b1, c1, eps) ||
-		predicates.PointStrictlyInTriangle(c2, a1, b1, c1, eps) {
-		return "VERTEX INSIDE"
-	}
-
-	// Check if any vertex of t1 is strictly inside t2
-	if predicates.PointStrictlyInTriangle(a1, a2, b2, c2, eps) ||
-		predicates.PointStrictlyInTriangle(b1, a2, b2, c2, eps) ||
-		predicates.PointStrictlyInTriangle(c1, a2, b2, c2, eps) {
-		return "VERTEX INSIDE"
-	}
-
-	// Check if edges intersect (excluding shared edges)
-	edges1 := t1.Edges()
-	edges2 := t2.Edges()
-
-	for _, e1 := range edges1 {
-		for _, e2 := range edges2 {
-			if e1 == e2 {
-				continue // Shared edge is OK
-			}
-
-			p1 := m.GetVertex(e1.V1())
-			p2 := m.GetVertex(e1.V2())
-			p3 := m.GetVertex(e2.V1())
-			p4 := m.GetVertex(e2.V2())
-
-			intersects, proper := predicates.SegmentsIntersect(p1, p2, p3, p4, eps)
-			if intersects && proper {
-				return "EDGE INTERSECTION"
-			}
-		}
-	}
-
-	return ""
-}
-
-func countSharedVertices(t1, t2 types.Triangle) int {
-	count := 0
-	verts1 := []types.VertexID{t1.V1(), t1.V2(), t1.V3()}
-	verts2 := []types.VertexID{t2.V1(), t2.V2(), t2.V3()}
-
-	for _, v1 := range verts1 {
-		for _, v2 := range verts2 {
-			if v1 == v2 {
-				count++
-				break
-			}
-		}
-	}
-	return count
 }

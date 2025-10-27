@@ -31,6 +31,13 @@ func (m *Mesh) AddTriangle(v1, v2, v3 types.VertexID) error {
 		}
 	}
 
+	// Check for volumetric triangle overlap
+	if m.cfg.validateTriangleOverlapArea {
+		if err := m.validateTriangleDoesNotOverlap(tri, a, b, c); err != nil {
+			return err
+		}
+	}
+
 	m.triangles = append(m.triangles, tri)
 
 	edges := tri.Edges()
@@ -163,4 +170,40 @@ func (m *Mesh) edgesCross(e1, e2 types.Edge) bool {
 	// Use the predicates package to check for proper intersection
 	intersects, proper := predicates.SegmentsIntersect(a1, a2, b1, b2, m.cfg.epsilon)
 	return intersects && proper
+}
+
+// validateTriangleDoesNotOverlap checks if the new triangle has any volumetric overlap
+// with existing triangles in the mesh.
+//
+// This is the most comprehensive overlap check, using geometric intersection area
+// calculations. It catches all overlap cases including:
+//   - Collinear edge overlaps
+//   - Partial vertex containment
+//   - Complex geometric overlaps
+//
+// This check is more expensive than other validations (O(n) where n = number of triangles),
+// so it should be used when correctness is critical.
+func (m *Mesh) validateTriangleDoesNotOverlap(tri types.Triangle, a, b, c types.Point) error {
+	// Check against all existing triangles
+	for i, existingTri := range m.triangles {
+		a2 := m.vertices[existingTri.V1()]
+		b2 := m.vertices[existingTri.V2()]
+		c2 := m.vertices[existingTri.V3()]
+
+		// Calculate intersection area
+		intersectionArea := predicates.TriangleIntersectionArea(a, b, c, a2, b2, c2, m.cfg.epsilon)
+
+		// DEBUG: Temporary logging
+		_ = intersectionArea // Prevent unused variable error if logging is removed
+
+		// If there's meaningful overlap (area > epsilon), reject
+		if intersectionArea > m.cfg.epsilon {
+			return ErrTriangleOverlap{
+				TriangleIndex:    i,
+				IntersectionArea: intersectionArea,
+			}
+		}
+	}
+
+	return nil
 }

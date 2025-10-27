@@ -46,6 +46,15 @@ func WithEdgeIntersectionCheck(enable bool) Option {
 	}
 }
 
+// WithTriangleOverlapCheck enables volumetric triangle overlap validation.
+// This performs geometric intersection area calculations to detect overlapping triangles.
+// This is more expensive than other validation checks but catches all overlap cases.
+func WithTriangleOverlapCheck(enable bool) Option {
+	return func(c *config) {
+		c.validateTriangleOverlapArea = enable
+	}
+}
+
 // WithEdgeCannotCrossPerimeter prevents triangle edges from crossing perimeter or hole boundaries.
 //
 // When enabled, triangle edges cannot intersect perimeter or hole edge segments.

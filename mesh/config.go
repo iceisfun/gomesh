@@ -8,11 +8,12 @@ type config struct {
 	mergeVertices bool
 	mergeDistance float64
 
-	validateVertexInside        bool
-	validateEdgeIntersection    bool
+	validateVertexInside             bool
+	validateEdgeIntersection         bool
 	validateEdgeCannotCrossPerimeter bool
-	errorOnDuplicateTriangle    bool
-	errorOnOpposingDuplicate    bool
+	validateTriangleOverlapArea      bool // Check for volumetric triangle overlap
+	errorOnDuplicateTriangle         bool
+	errorOnOpposingDuplicate         bool
 
 	debugAddVertex   func(types.VertexID, types.Point)
 	debugAddEdge     func(types.Edge)
