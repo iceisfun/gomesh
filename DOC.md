@@ -93,19 +93,19 @@ The algorithm proceeds as follows:
 7. Remove cover vertices and export to mesh.Mesh
 
 
-## func BuildSimple — `cdt/builder.go:190`
+## func BuildSimple — `cdt/builder.go:191`
 
 [BuildSimple](BuildSimple)func BuildSimple(outer []types.Point, holes [][]types.Point) (*mesh.Mesh, error)
 BuildSimple is a convenience wrapper that uses default options.
 
 
-## func BuildWithConstraints — `cdt/builder.go:195`
+## func BuildWithConstraints — `cdt/builder.go:196`
 
 [BuildWithConstraints](BuildWithConstraints)func BuildWithConstraints(outer []types.Point, holes [][]types.Point, constraints [][2]types.Point) (*mesh.Mesh, error)
 BuildWithConstraints includes extra constraint edges beyond the perimeter and holes.
 
 
-## func BuildWithOptions — `cdt/builder.go:200`
+## func BuildWithOptions — `cdt/builder.go:201`
 
 [BuildWithOptions](BuildWithOptions)func BuildWithOptions(outer []types.Point, holes [][]types.Point, constraints [][2]types.Point, opts BuildOptions) (*mesh.Mesh, error)
 BuildWithOptions provides full control over the CDT construction process.
@@ -194,7 +194,7 @@ IsIllegal checks if an edge between two triangles violates the Delaunay property
 Returns true if the edge should be flipped.
 
 
-## func IsPointInTriangle — `cdt/locate.go:147`
+## func IsPointInTriangle — `cdt/locate.go:287`
 
 [IsPointInTriangle](IsPointInTriangle)func IsPointInTriangle(ts *TriSoup, t TriID, p types.Point) bool
 IsPointInTriangle checks if point p is inside triangle t. Returns true if inside or on the boundary.
@@ -303,7 +303,7 @@ Diagnostics provides information about the CDT construction process.
 	    ConstraintsRespect bool
 	}
 
-## func GetDiagnostics — `cdt/builder.go:215`
+## func GetDiagnostics — `cdt/builder.go:216`
 
 [GetDiagnostics](GetDiagnostics)func GetDiagnostics(ts *TriSoup, constrained map[EdgeKey]bool) Diagnostics
 GetDiagnostics analyzes a TriSoup and returns diagnostic information.
@@ -360,19 +360,19 @@ Locator provides fast point location within a triangulation via walking.
 	    // contains filtered or unexported fields
 	}
 
-## func NewLocator — `cdt/locate.go:17`
+## func NewLocator — `cdt/locate.go:28`
 
 [NewLocator](NewLocator)func NewLocator(ts *TriSoup) *Locator
 NewLocator creates a point locator for the given triangulation.
 
 
-## func LocatePoint — `cdt/locate.go:35`
+## func LocatePoint — `cdt/locate.go:46`
 
 [LocatePoint](Locator.LocatePoint)func (l *Locator) LocatePoint(p types.Point) (Location, error)
 LocatePoint finds which triangle contains point p. Returns the location \(triangle ID and whether on edge\) or an error.
 
 
-## func LocatePointFrom — `cdt/locate.go:135`
+## func LocatePointFrom — `cdt/locate.go:275`
 
 [LocatePointFrom](Locator.LocatePointFrom)func (l *Locator) LocatePointFrom(p types.Point, start TriID) (Location, error)
 LocatePointFrom locates a point starting from a specific triangle. This is useful when you have a good hint about where the point might be.

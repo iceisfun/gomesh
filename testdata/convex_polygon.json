@@ -1,0 +1,23 @@
+{
+  "vertices": [
+    {"X": 50, "Y": 10},
+    {"X": 90, "Y": 40},
+    {"X": 90, "Y": 90},
+    {"X": 50, "Y": 120},
+    {"X": 10, "Y": 90},
+    {"X": 10, "Y": 40}
+  ],
+  "perimeters": [[0, 1, 2, 3, 4, 5]],
+  "holes": [],
+  "triangles": [],
+  "config": {
+    "epsilon": 1e-10,
+    "merge_vertices": false,
+    "merge_distance": 0,
+    "validate_vertex_inside": false,
+    "validate_edge_intersection": false,
+    "validate_edge_cannot_cross_perimeter": false,
+    "error_on_duplicate_triangle": false,
+    "error_on_opposing_duplicate": false
+  }
+}

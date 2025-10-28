@@ -35,6 +35,36 @@ func main() {
 	}
 }
 
+// convertLoopToPoints converts a polygon loop from vertex IDs to points,
+// removing consecutive duplicate vertices.
+func convertLoopToPoints(m *mesh.Mesh, loop types.PolygonLoop) []types.Point {
+	if len(loop) == 0 {
+		return nil
+	}
+
+	points := make([]types.Point, 0, len(loop))
+	var lastPoint *types.Point
+
+	for _, vid := range loop {
+		p := m.GetVertex(vid)
+
+		// Skip if this point is the same as the last one
+		if lastPoint != nil && p.X == lastPoint.X && p.Y == lastPoint.Y {
+			continue
+		}
+
+		points = append(points, p)
+		lastPoint = &p
+	}
+
+	// Check if the first and last points are the same (closed loop)
+	if len(points) > 1 && points[0].X == points[len(points)-1].X && points[0].Y == points[len(points)-1].Y {
+		points = points[:len(points)-1]
+	}
+
+	return points
+}
+
 func run(loadFile, outputFile string, width, height int) error {
 	// Load the mesh from JSON
 	fmt.Printf("Loading mesh from %s...\n", loadFile)
@@ -56,20 +86,14 @@ func run(loadFile, outputFile string, width, height int) error {
 
 	// Convert the first perimeter from vertex IDs to points
 	outerLoop := perimeters[0]
-	outerPoints := make([]types.Point, len(outerLoop))
-	for i, vid := range outerLoop {
-		outerPoints[i] = m.GetVertex(vid)
-	}
+	outerPoints := convertLoopToPoints(m, outerLoop)
 
-	fmt.Printf("Outer perimeter has %d vertices\n", len(outerPoints))
+	fmt.Printf("Outer perimeter has %d vertices (after deduplication)\n", len(outerPoints))
 
 	// Convert holes from vertex IDs to points
 	holePoints := make([][]types.Point, len(holes))
 	for i, hole := range holes {
-		holePoints[i] = make([]types.Point, len(hole))
-		for j, vid := range hole {
-			holePoints[i][j] = m.GetVertex(vid)
-		}
+		holePoints[i] = convertLoopToPoints(m, hole)
 	}
 
 	fmt.Printf("Converting %d holes\n", len(holePoints))

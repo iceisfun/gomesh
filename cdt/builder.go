@@ -110,6 +110,7 @@ func Build(outer []types.Point, holes [][]types.Point, extras [][2]types.Point, 
 		// Locate the point
 		loc, err := locator.LocatePoint(p)
 		if err != nil {
+			fmt.Printf("[Builder] LocatePoint failed for vertex %d at (%.12f, %.12f)\n", vidx, p.X, p.Y)
 			return nil, fmt.Errorf("failed to locate vertex %d: %w", vidx, err)
 		}
 
