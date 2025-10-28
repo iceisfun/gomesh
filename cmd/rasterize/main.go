@@ -14,17 +14,17 @@ import (
 )
 
 var (
-	width           = flag.Int("width", 1920, "Output image width")
-	height          = flag.Int("height", 1080, "Output image height")
-	output          = flag.String("output", "", "Output PNG file (default: input.png)")
-	fillTriangles   = flag.Bool("fill", true, "Fill triangles")
-	drawVertices    = flag.Bool("vertices", true, "Draw vertices")
-	drawEdges       = flag.Bool("edges", true, "Draw edges")
-	drawPerimeters  = flag.Bool("perimeters", true, "Draw perimeters")
-	drawHoles       = flag.Bool("holes", true, "Draw holes")
-	vertexLabels    = flag.Bool("vertex-labels", false, "Show vertex labels")
-	edgeLabels      = flag.Bool("edge-labels", false, "Show edge labels")
-	triangleLabels  = flag.Bool("triangle-labels", false, "Show triangle labels")
+	width          = flag.Int("width", 1920, "Output image width")
+	height         = flag.Int("height", 1080, "Output image height")
+	output         = flag.String("output", "", "Output PNG file (default: input.png)")
+	fillTriangles  = flag.Bool("fill", true, "Fill triangles")
+	drawVertices   = flag.Bool("vertices", true, "Draw vertices")
+	drawEdges      = flag.Bool("edges", true, "Draw edges")
+	drawPerimeters = flag.Bool("perimeters", true, "Draw perimeters")
+	drawHoles      = flag.Bool("holes", true, "Draw holes")
+	vertexLabels   = flag.Bool("vertex-labels", false, "Show vertex labels")
+	edgeLabels     = flag.Bool("edge-labels", false, "Show edge labels")
+	triangleLabels = flag.Bool("triangle-labels", false, "Show triangle labels")
 )
 
 func main() {
@@ -41,6 +41,18 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	fmt.Println("width        : ", *width)
+	fmt.Println("height       : ", *height)
+	fmt.Println("output       : ", *output)
+	fmt.Println("fillTriangles: ", *fillTriangles)
+	fmt.Println("drawVertices : ", *drawVertices)
+	fmt.Println("drawEdges    : ", *drawEdges)
+	fmt.Println("drawPerimeters: ", *drawPerimeters)
+	fmt.Println("drawHoles    : ", *drawHoles)
+	fmt.Println("vertexLabels : ", *vertexLabels)
+	fmt.Println("edgeLabels   : ", *edgeLabels)
+	fmt.Println("triangleLabels: ", *triangleLabels)
 
 	inputFile := flag.Arg(0)
 
